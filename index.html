@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeStay Services - Premium Apartments & Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+            scroll-behavior: smooth; /* Smooth scrolling */
+            line-height: 1.6;
+        }
+        /* Style for active navigation link */
+        .nav-link-active { color: #ca8a04; /* Gold color for active link */ font-weight: 600; }
+        /* Simple transition for page sections */
+        .page-section { display: none; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Colors */
+        .text-gold-600 { color: #ca8a04; }
+        .bg-gold-600 { background-color: #ca8a04; }
+        .border-gold-600 { border-color: #ca8a04; }
+        .hover\:bg-gold-700:hover { background-color: #a16207; }
+        .focus\:ring-gold-600:focus { --tw-ring-color: #ca8a04; }
+        .bg-deep-blue-900 { background-color: #1e3a8a; }
+        .text-deep-blue-900 { color: #1e3a8a; }
+        .hover\:bg-deep-blue-800:hover { background-color: #1e40af; }
+        .bg-blue-700 { background-color: #1d4ed8; }
+        .text-blue-100 { color: #dbeafe; }
+
+        /* Base Image Styling */
+        img { max-width: 100%; height: auto; background-color: #e5e7eb; /* Placeholder background */ display: block; border-radius: 0.5rem; }
+        /* Card Styling */
+        .item-card { transition: transform 0.3s ease, box-shadow 0.3s ease; border-radius: 0.75rem; overflow: hidden; background-color: white; }
+        .item-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        /* Modal Styling */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s ease-in-out; }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 0.5rem; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; }
+        .modal-close { color: #aaa; position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .modal-close:hover, .modal-close:focus { color: black; text-decoration: none; cursor: pointer; }
+        /* Star Rating Styles */
+        .star-rating { display: inline-block; }
+        .star-rating .fa-star { color: #d1d5db; /* Default gray */ cursor: pointer; }
+        .star-rating .fa-star.selected, .star-rating .fa-star:hover, .star-rating .fa-star:hover ~ .fa-star { color: #ca8a04; /* Gold */ }
+        .display-stars .fa-star { color: #ca8a04; } /* Gold for filled */
+        .display-stars .far.fa-star { color: #d1d5db; } /* Gray for empty star */
+        .display-stars .fas.fa-star-half-alt { color: #ca8a04; } /* Gold for half star */
+
+        /* Dashboard Active Link */
+        .dashboard-link.active-dashboard-link { background-color: #f3f4f6; /* light gray */ color: #ca8a04; /* gold */ font-weight: 600; }
+
+        /* Map Container Styling */
+        #apartment-map-container { height: 300px; width: 100%; border-radius: 0.5rem; background-color: #e5e7eb; margin-bottom: 1.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .leaflet-container { height: 100%; width: 100%; border-radius: inherit; }
+        /* Tailwind helper for line clamping */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-deep-blue-900 nav-link" data-target="home">
+                LuxeStay<span class="text-gold-600">Services</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-6" id="desktop-nav-links">
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="home">Home</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="apartments">Apartments</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="services">Services</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="about">About Us</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="contact">Contact</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link" data-target="partner">Become a Partner</a>
+                <!-- Logged out -->
+                <a href="#" class="bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 nav-link" data-target="login" id="nav-login">Login</a>
+                <a href="#" class="border border-gold-600 text-gold-600 hover:bg-gold-600 hover:text-white font-semibold py-2 px-4 rounded-lg transition duration-300 nav-link" data-target="signup" id="nav-signup">Sign Up</a>
+                <!-- Logged in -->
+                <a href="#" class="text-gray-600 hover:text-gold-600 nav-link hidden" data-target="dashboard" id="nav-dashboard">Dashboard</a>
+                <a href="#" class="text-gray-600 hover:text-gold-600 hidden cursor-pointer" id="nav-logout">Logout</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white py-2 border-t">
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="home">Home</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="apartments">Apartments</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="services">Services</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="about">About Us</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="contact">Contact</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link" data-target="partner">Become a Partner</a>
+            <!-- Logged out -->
+            <a href="#" class="block px-6 py-2 text-gold-600 hover:bg-gray-100 nav-link" data-target="login" id="mobile-nav-login">Login</a>
+            <a href="#" class="block px-6 py-2 text-gold-600 hover:bg-gray-100 nav-link" data-target="signup" id="mobile-nav-signup">Sign Up</a>
+            <!-- Logged in -->
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hover:text-gold-600 nav-link hidden" data-target="dashboard" id="mobile-nav-dashboard">Dashboard</a>
+            <a href="#" class="block px-6 py-2 text-gray-600 hover:bg-gray-100 hidden cursor-pointer" id="mobile-nav-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <!-- Home Section -->
+        <section id="home" class="page-section">
+            <div class="bg-gradient-to-r from-deep-blue-900 to-blue-700 text-white py-20 px-6 rounded-lg shadow-xl text-center mb-16">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Luxury Stays, Elevated Services</h1>
+                <p class="text-lg md:text-xl mb-8 text-blue-100">Discover premium shortlets and access curated services for an unforgettable experience.</p>
+                <div class="space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button class="w-full sm:w-auto bg-white text-deep-blue-900 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition duration-300 nav-link" data-target="apartments">
+                        Find Apartments
+                    </button>
+                    <button class="w-full sm:w-auto bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 nav-link" data-target="services">
+                        Explore Services
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-16">
+                <h2 class="text-3xl font-semibold text-center mb-8 text-deep-blue-900">Featured Apartments</h2>
+                <div id="featured-apartments-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Featured Apartments Loaded by JS -->
+                    <p class="text-center text-gray-500 col-span-full">Loading featured apartments...</p>
+                </div>
+            </div>
+
+            <div class="mb-16">
+                <h2 class="text-3xl font-semibold text-center mb-8 text-deep-blue-900">Featured Services</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Static Featured Services Cards -->
+                    <div class="item-card">
+                        <img src="https://images.unsplash.com/photo-1556909172-6ab851594e2c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Private Chef plating food" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/a0aec0?text=Image+Error'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">Private Chef Experience</h3>
+                            <p class="text-gray-600 mb-4 text-sm">Savor bespoke meals crafted in your kitchen.</p>
+                            <a href="#" class="text-gold-600 hover:underline font-medium nav-link" data-target="services" data-service-id="chef-gourmet">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <img src="https://images.unsplash.com/photo-1515377905703-c478cb05151b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Luxury massage setting" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/a0aec0?text=Image+Error'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">In-Home Spa & Massage</h3>
+                            <p class="text-gray-600 mb-4 text-sm">Unwind with professional spa treatments.</p>
+                            <a href="#" class="text-gold-600 hover:underline font-medium nav-link" data-target="services" data-service-id="massage-deep">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                     <div class="item-card">
+                        <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Luxury car with chauffeur" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/a0aec0?text=Image+Error'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">Luxury Chauffeur</h3>
+                            <p class="text-gray-600 mb-4 text-sm">Travel in style and comfort.</p>
+                            <a href="#" class="text-gold-600 hover:underline font-medium nav-link" data-target="services" data-service-id="chauffeur-luxury">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-100 py-16 px-6 rounded-lg">
+                <h2 class="text-3xl font-semibold text-center mb-10 text-deep-blue-900">How LuxeStay Works</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                     <div>
+                        <div class="bg-gold-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold"><i class="fas fa-search"></i></div>
+                        <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">Discover</h3>
+                        <p class="text-gray-600 text-sm">Browse premium apartments and curated services.</p>
+                    </div>
+                    <div>
+                        <div class="bg-gold-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold"><i class="fas fa-calendar-alt"></i></div>
+                        <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">Book</h3>
+                        <p class="text-gray-600 text-sm">Select your dates, choose services, and book securely.</p>
+                    </div>
+                    <div>
+                        <div class="bg-gold-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold"><i class="fas fa-concierge-bell"></i></div>
+                        <h3 class="text-xl font-semibold mb-2 text-deep-blue-900">Enjoy</h3>
+                        <p class="text-gray-600 text-sm">Relax as vetted professionals deliver exceptional experiences.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Apartments Listing Section -->
+        <section id="apartments" class="page-section">
+            <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Explore Luxury Apartments</h1>
+            <div class="mb-8 flex flex-col sm:flex-row gap-4">
+                <input type="text" id="apartment-search-input" placeholder="Search by location (e.g., Lekki, Ikoyi, VI)" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-600 focus:border-transparent">
+                <select id="apartment-bedrooms-filter" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-600 focus:border-transparent">
+                    <option value="">Bedrooms</option>
+                    <option value="1">1 Bedroom</option>
+                    <option value="2">2 Bedrooms</option>
+                    <option value="3">3 Bedrooms</option>
+                    <option value="4">4 Bedrooms</option>
+                    <option value="5+">5+ Bedrooms</option>
+                </select>
+                </div>
+            <div id="apartment-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Apartments Loaded by JS -->
+                <p class="text-center text-gray-500 col-span-full">Loading apartments...</p>
+            </div>
+             <div id="no-apartments-message" class="hidden text-center text-gray-500 mt-10">
+                <p>No apartments match your current search or filter.</p>
+            </div>
+        </section>
+
+        <!-- Apartment Detail Section -->
+        <section id="apartment-detail" class="page-section">
+            <button class="mb-6 text-gold-600 hover:underline nav-link" data-target="apartments">&larr; Back to Apartments</button>
+            <div class="bg-white p-8 rounded-lg shadow-xl">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Left Column: Image -->
+                    <div class="lg:w-2/3">
+                        <img id="apartment-detail-img" src="https://placehold.co/800x500/cccccc/ffffff?text=Apartment+Image" alt="Apartment Image" class="w-full h-auto rounded-lg shadow-md mb-4 object-cover" style="max-height: 500px;">
+                    </div>
+                    <!-- Right Column: Info & Booking -->
+                    <div class="lg:w-1/3">
+                        <h1 id="apartment-detail-title" class="text-3xl font-bold mb-2 text-deep-blue-900">Apartment Title</h1>
+                        <p id="apartment-detail-location" class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-1 text-gold-600"></i> Location</p>
+                        <p id="apartment-detail-price" class="text-2xl font-semibold text-deep-blue-900 mb-4">₦Price / night</p>
+                        <div class="text-sm text-gray-600 mb-4 space-x-4">
+                            <span id="apartment-detail-bedrooms"><i class="fas fa-bed mr-1 text-gold-600"></i> X Bedrooms</span>
+                            <span id="apartment-detail-bathrooms"><i class="fas fa-bath mr-1 text-gold-600"></i> Y Bathrooms</span>
+                            <span id="apartment-detail-guests"><i class="fas fa-users mr-1 text-gold-600"></i> Z Guests</span>
+                        </div>
+                        <p id="apartment-detail-description" class="text-gray-700 text-sm mb-6 line-clamp-3">Description loading...</p>
+                        <div class="border-t pt-6">
+                             <h3 class="text-lg font-semibold mb-3 text-deep-blue-900">Check Availability & Book</h3>
+                             <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                                 <input type="date" id="apt-booking-checkin" class="p-2 border border-gray-300 rounded-lg flex-1 text-sm" aria-label="Check-in Date">
+                                 <input type="date" id="apt-booking-checkout" class="p-2 border border-gray-300 rounded-lg flex-1 text-sm" aria-label="Check-out Date">
+                             </div>
+                             <button id="request-apartment-booking-button" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Request to Book</button>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Bottom Row: Amenities & Map -->
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t mt-8 pt-8">
+                     <div>
+                         <h2 class="text-xl font-semibold text-deep-blue-900 mb-3">Amenities</h2>
+                         <ul id="apartment-detail-amenities" class="list-none text-gray-700 text-sm grid grid-cols-2 gap-x-4 gap-y-2">
+                             <!-- Amenities Loaded by JS -->
+                             <li><i class="fas fa-spinner fa-spin mr-2 text-gold-600"></i>Loading...</li>
+                         </ul>
+                     </div>
+                     <div>
+                         <h2 class="text-xl font-semibold text-deep-blue-900 mb-3">Location Map</h2>
+                         <!-- Map Container -->
+                         <div id="apartment-map-container">
+                            <div id="apartment-map" class="w-full h-full"></div> <!-- Leaflet attaches here -->
+                         </div>
+                         <p class="text-xs text-gray-500">Exact location provided after booking.</p>
+                     </div>
+                 </div>
+                  <!-- Apartment Reviews Section -->
+                 <div class="border-t mt-8 pt-8">
+                     <h2 class="text-2xl font-semibold text-deep-blue-900 mb-4">Guest Reviews</h2>
+                     <div id="apartment-reviews-list" class="space-y-4">
+                         <p class="text-gray-500 italic">No reviews yet for this apartment.</p>
+                         <!-- Reviews Loaded by JS -->
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Services Listing Section -->
+        <section id="services" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Our Premium Services</h1>
+             <div class="mb-8 flex flex-col sm:flex-row gap-4">
+                <input type="text" id="service-search-input-page" placeholder="Search services (e.g., Massage, Chef)" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-600 focus:border-transparent">
+                <select id="service-category-filter-page" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-600 focus:border-transparent">
+                    <option value="">All Categories</option>
+                    <option value="culinary">Culinary</option>
+                    <option value="wellness">Wellness & Pampering</option>
+                    <option value="companionship">Companionship & Social</option>
+                    <option value="convenience">Convenience & Security</option>
+                    <option value="professional">Professional & Advisory</option>
+                    <option value="exclusive">Exclusive Experiences</option>
+                </select>
+            </div>
+            <div id="service-grid-container-page" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Services Loaded by JS -->
+                <p class="text-center text-gray-500 col-span-full">Loading services...</p>
+            </div>
+            <div id="no-services-message-page" class="hidden text-center text-gray-500 mt-10">
+                <p>No services match your current search or filter.</p>
+            </div>
+        </section>
+
+        <!-- Service Detail Section -->
+        <section id="service-detail" class="page-section">
+             <button class="mb-6 text-gold-600 hover:underline nav-link" data-target="services">&larr; Back to Services</button>
+             <div class="bg-white p-8 rounded-lg shadow-xl">
+                 <!-- Service Info -->
+                 <div class="mb-10 border-b pb-8">
+                     <span id="service-detail-category-page" class="text-sm text-gold-600 font-medium uppercase tracking-wider">Category</span>
+                     <h1 id="service-detail-title-page" class="text-3xl md:text-4xl font-bold my-2 text-deep-blue-900">Service Title</h1>
+                     <div class="flex items-center mb-4">
+                         <span id="service-detail-avg-rating-stars-page" class="display-stars text-lg mr-2"></span>
+                         <span id="service-detail-rating-count-display-page" class="text-sm text-gray-500">(0 Reviews)</span>
+                     </div>
+                     <p id="service-detail-price-page" class="text-2xl font-semibold text-deep-blue-900 mb-4">Price</p>
+                     <p id="service-detail-duration-page" class="text-gray-600 mb-4 text-sm">Duration: <span class="font-medium"> Varies</span></p>
+                     <p id="service-detail-description-page" class="text-gray-700 leading-relaxed">Description loading...</p>
+                 </div>
+
+                 <!-- Available Providers -->
+                 <div class="mb-10 border-b pb-8">
+                     <h2 class="text-2xl font-semibold text-deep-blue-900 mb-4">Available Partners</h2>
+                     <div id="service-providers-list" class="space-y-6">
+                         <!-- Providers Loaded by JS -->
+                         <p class="text-gray-500 italic">Loading available providers...</p>
+                     </div>
+                 </div>
+
+                 <!-- Service Reviews -->
+                 <div>
+                     <div class="flex justify-between items-center mb-4">
+                         <h2 class="text-2xl font-semibold text-deep-blue-900">Guest Reviews for this Service</h2>
+                         <button id="write-review-button-page" class="border border-gold-600 text-gold-600 hover:bg-gold-600 hover:text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">
+                             Write a Review
+                         </button>
+                     </div>
+                     <div id="service-reviews-list-page" class="space-y-4">
+                         <!-- Service Reviews Loaded by JS -->
+                         <p class="text-gray-500 italic">No reviews yet for this service.</p>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Provider Profile Section -->
+        <section id="provider-profile" class="page-section">
+            <!-- Back button managed by JS to go to correct service or services list -->
+            <button id="provider-back-button" class="mb-6 text-gold-600 hover:underline nav-link" data-target="services">&larr; Back</button>
+            <div class="bg-white p-8 rounded-lg shadow-xl">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6 border-b pb-6">
+                    <img id="provider-profile-img" src="https://placehold.co/150x150/ca8a04/ffffff?text=Provider" alt="Provider Profile Picture" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-gold-600 flex-shrink-0">
+                    <div class="flex-grow">
+                        <h1 id="provider-profile-name" class="text-3xl font-bold text-deep-blue-900">Provider Name</h1>
+                        <p id="provider-profile-specialty" class="text-lg text-gray-600">Specialty</p>
+                        <div class="flex items-center my-2">
+                             <span id="provider-profile-avg-rating-stars" class="display-stars text-lg mr-2"></span>
+                            <span id="provider-profile-rating-count-display" class="text-sm text-gray-500">(0 Reviews)</span>
+                        </div>
+                        <p class="text-sm text-green-600 font-semibold">Verified Partner <i class="fas fa-check-circle"></i></p>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div><h2 class="text-xl font-semibold text-deep-blue-900 mb-3">About <span id="provider-profile-name-about">Provider</span></h2><p id="provider-profile-bio" class="text-gray-700 leading-relaxed">Bio loading...</p></div>
+                    <div><h2 class="text-xl font-semibold text-deep-blue-900 mb-3">Services Offered</h2><ul id="provider-profile-services" class="list-disc list-inside text-gray-700 pl-4 space-y-1"><li>Loading services...</li></ul></div>
+                    <div><h2 class="text-xl font-semibold text-deep-blue-900 mb-3">Reviews for this Provider</h2><div id="provider-reviews-list" class="space-y-4"><p class="text-gray-500 italic">Loading reviews...</p></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">About LuxeStay Services</h1>
+             <div class="bg-white p-8 rounded-lg shadow-xl space-y-6 text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
+               <p>LuxeStay Services is Nigeria's premier platform connecting discerning guests in luxury short-term rentals with an exclusive selection of vetted, on-demand services and experiences.</p>
+               <p>From finding the perfect upscale apartment to booking a private chef, mobile spa treatment, executive security, or even unique experiences like celebrity meet-and-greets, we provide seamless access to elevate your stay.</p>
+               <h2 class="text-2xl font-semibold text-deep-blue-900 pt-4">Our Mission</h2>
+               <p>To be the most trusted and convenient platform for accessing luxury apartments and lifestyle services within Nigeria, enhancing every stay with comfort, indulgence, security, and unforgettable moments.</p>
+               <h2 class="text-2xl font-semibold text-deep-blue-900 pt-4">Our Values</h2>
+               <ul class="list-disc list-inside space-y-2 pl-4">
+                   <li><span class="font-semibold text-deep-blue-900">Excellence & Quality:</span> We partner only with the best apartments and service providers, ensuring top-tier quality.</li>
+                   <li><span class="font-semibold text-deep-blue-900">Trust & Safety:</span> Rigorous vetting, secure payments, and transparent processes are paramount for peace of mind.</li>
+                   <li><span class="font-semibold text-deep-blue-900">Unmatched Convenience:</span> Effortless browsing, booking, and scheduling designed around your needs.</li>
+                   <li><span class="font-semibold text-deep-blue-900">Absolute Discretion:</span> We respect your privacy and ensure professional conduct from all partners.</li>
+                   <li><span class="font-semibold text-deep-blue-900">Curated Luxury:</span> We focus on providing premium experiences that add significant value to your stay.</li>
+               </ul>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Contact Us</h1>
+             <div class="bg-white p-8 rounded-lg shadow-xl max-w-3xl mx-auto">
+                 <p class="text-center text-gray-600 mb-8">Have questions, feedback, or need assistance? Reach out to us.</p>
+                 <form id="contact-form" class="space-y-6">
+                     <div><label for="contact-name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" name="contact-name" id="contact-name" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div><label for="contact-email" class="block text-sm font-medium text-gray-700">Email Address</label><input type="email" name="contact-email" id="contact-email" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div><label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label><input type="text" name="contact-subject" id="contact-subject" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div><label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label><textarea name="contact-message" id="contact-message" rows="4" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></textarea></div>
+                     <div><button type="submit" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Send Message</button></div>
+                 </form>
+                 <div class="mt-10 text-center text-gray-600">
+                     <p>You can also reach us at:</p>
+                     <p>Email: <a href="mailto:support@luxestayservices.ng" class="text-gold-600 hover:underline">support@luxestayservices.ng</a></p>
+                     <p>Phone: +234 800 123 4567 (Mon-Fri, 9am-5pm)</p>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Login Section -->
+        <section id="login" class="page-section">
+            <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Login</h1>
+            <div class="bg-white p-8 rounded-lg shadow-xl max-w-md mx-auto">
+                 <div id="login-feedback" class="mb-4 text-red-600 text-sm hidden p-3 bg-red-50 border border-red-200 rounded-md"></div>
+                <form id="login-form" class="space-y-6">
+                    <div><label for="login-email" class="block text-sm font-medium text-gray-700">Email Address</label><input type="email" name="login-email" id="login-email" required autocomplete="email" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                    <div><label for="login-password" class="block text-sm font-medium text-gray-700">Password</label><input type="password" name="login-password" id="login-password" required autocomplete="current-password" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                    <div>
+                        <label for="login-user-type" class="block text-sm font-medium text-gray-700">Login As</label>
+                        <select id="login-user-type" name="login-user-type" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600 bg-white">
+                            <option value="guest">Guest</option>
+                            <option value="apartment_vendor">Apartment Partner</option>
+                            <option value="service_provider">Service Partner</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center"><input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded"><label for="remember-me" class="ml-2 block text-sm text-gray-900"> Remember me </label></div>
+                        <div class="text-sm"><a href="#" class="font-medium text-gold-600 hover:text-gold-500"> Forgot password? </a></div>
+                    </div>
+                    <div><button type="submit" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Sign In</button></div>
+                </form>
+                 <p class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="#" class="font-medium text-gold-600 hover:text-gold-500 nav-link" data-target="signup"> Sign Up as Guest </a></p>
+                 <p class="mt-2 text-center text-sm text-gray-600">Want to list property/service? <a href="#" class="font-medium text-gold-600 hover:text-gold-500 nav-link" data-target="partner"> Become a Partner </a></p>
+            </div>
+        </section>
+
+        <!-- Signup Section (Guests Only) -->
+        <section id="signup" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Create Guest Account</h1>
+             <div class="bg-white p-8 rounded-lg shadow-xl max-w-md mx-auto">
+                 <div id="signup-feedback" class="mb-4 text-red-600 text-sm hidden p-3 bg-red-50 border border-red-200 rounded-md"></div>
+                 <form id="signup-form" class="space-y-6">
+                     <div><label for="signup-name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" name="signup-name" id="signup-name" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div><label for="signup-email" class="block text-sm font-medium text-gray-700">Email Address</label><input type="email" name="signup-email" id="signup-email" required autocomplete="email" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div><label for="signup-password" class="block text-sm font-medium text-gray-700">Password (min 6 characters)</label><input type="password" name="signup-password" id="signup-password" required autocomplete="new-password" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                      <div><label for="signup-confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label><input type="password" name="signup-confirm-password" id="signup-confirm-password" required autocomplete="new-password" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gold-600 focus:border-gold-600"></div>
+                     <div class="flex items-center"><input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded"><label for="terms" class="ml-2 block text-sm text-gray-900"> I agree to the <a href="#" class="text-gold-600 hover:underline">Terms and Conditions</a> </label></div>
+                     <div><button type="submit" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Sign Up</button></div>
+                 </form>
+                 <p class="mt-6 text-center text-sm text-gray-600">Already have an account? <a href="#" class="font-medium text-gold-600 hover:text-gold-500 nav-link" data-target="login"> Login </a></p>
+                 <p class="mt-2 text-center text-sm text-gray-600">Want to list property/service? <a href="#" class="font-medium text-gold-600 hover:text-gold-500 nav-link" data-target="partner"> Become a Partner </a></p>
+             </div>
+        </section>
+
+        <!-- Become a Partner Section -->
+        <section id="partner" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Become a LuxeStay Partner</h1>
+             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="item-card p-8 text-center border border-gray-200 hover:shadow-xl transition duration-300">
+                     <i class="fas fa-building text-4xl text-gold-600 mb-4"></i>
+                     <h2 class="text-2xl font-semibold mb-3 text-deep-blue-900">List Your Luxury Apartment</h2>
+                     <p class="text-gray-600 mb-6 text-sm">Reach discerning guests seeking premium shortlet experiences in Nigeria. Benefit from our targeted marketing and secure booking system.</p>
+                     <button class="w-full bg-deep-blue-900 hover:bg-deep-blue-800 text-white font-bold py-3 px-6 rounded-lg transition duration-300 nav-link" data-target="apply-apartment">Apply as Apartment Partner</button>
+                 </div>
+                 <div class="item-card p-8 text-center border border-gray-200 hover:shadow-xl transition duration-300">
+                     <i class="fas fa-concierge-bell text-4xl text-gold-600 mb-4"></i>
+                     <h2 class="text-2xl font-semibold mb-3 text-deep-blue-900">Offer Your Premium Service</h2>
+                     <p class="text-gray-600 mb-6 text-sm">Connect with high-value clients staying in luxury shortlets. Showcase your expertise and grow your business with LuxeStay Services.</p>
+                     <button class="w-full bg-deep-blue-900 hover:bg-deep-blue-800 text-white font-bold py-3 px-6 rounded-lg transition duration-300 nav-link" data-target="apply-service">Apply as Service Partner</button>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Apply Apartment Section -->
+        <section id="apply-apartment" class="page-section">
+            <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Apartment Partner Application</h1>
+            <div class="bg-white p-8 rounded-lg shadow-xl max-w-3xl mx-auto">
+                 <p class="text-center text-gray-600 mb-8 text-sm">Thank you for your interest! Please provide the following details. Our partnership team will review your application and contact you.</p>
+                 <div id="apply-apartment-feedback" class="mb-4 text-red-600 text-sm hidden p-3 bg-red-50 border border-red-200 rounded-md"></div>
+                 <form id="apply-apartment-form" class="space-y-6">
+                     <fieldset class="border p-4 rounded-md">
+                         <legend class="text-lg font-semibold px-2 text-deep-blue-900">Contact Information</legend>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" name="aptAppName" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Email Address</label><input type="email" name="aptAppEmail" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" name="aptAppPhone" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Business Name (Optional)</label><input type="text" name="aptAppBusiness" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                         </div>
+                     </fieldset>
+                     <fieldset class="border p-4 rounded-md">
+                         <legend class="text-lg font-semibold px-2 text-deep-blue-900">Property Details</legend>
+                         <div class="space-y-4 mt-2">
+                            <div><label class="block text-sm font-medium text-gray-700">Property Address</label><input type="text" name="aptPropAddress" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Number of Bedrooms</label><input type="number" name="aptPropBeds" min="1" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Brief Description (Highlight luxury features)</label><textarea rows="3" name="aptPropDesc" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></textarea></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Link to Existing Listing (e.g., Airbnb, Booking.com - Optional)</label><input type="url" name="aptPropLink" placeholder="https://" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                         </div>
+                     </fieldset>
+                      <div class="flex items-start"><input id="apt-terms-app" name="aptTerms" type="checkbox" required class="h-4 w-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded mt-1 flex-shrink-0"><label for="apt-terms-app" class="ml-2 block text-sm text-gray-900"> I confirm the property meets LuxeStay's luxury standards and agree to the <a href="#" class="text-gold-600 hover:underline">Partner Terms & Conditions</a>. </label></div>
+                     <div><button type="submit" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Submit Apartment Application</button></div>
+                 </form>
+             </div>
+        </section>
+
+        <!-- Apply Service Section -->
+        <section id="apply-service" class="page-section">
+             <h1 class="text-4xl font-bold text-center mb-10 text-deep-blue-900">Service Partner Application</h1>
+             <div class="bg-white p-8 rounded-lg shadow-xl max-w-3xl mx-auto">
+                 <p class="text-center text-gray-600 mb-8 text-sm">Join our elite network of service professionals. Complete the form below for consideration.</p>
+                  <div id="apply-service-feedback" class="mb-4 text-red-600 text-sm hidden p-3 bg-red-50 border border-red-200 rounded-md"></div>
+                 <form id="apply-service-form" class="space-y-6">
+                     <fieldset class="border p-4 rounded-md">
+                         <legend class="text-lg font-semibold px-2 text-deep-blue-900">Contact Information</legend>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div><label class="block text-sm font-medium text-gray-700">Full Name / Business Name</label><input type="text" name="svcAppName" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Email Address</label><input type="email" name="svcAppEmail" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" name="svcAppPhone" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Website/Portfolio (Optional)</label><input type="url" name="svcAppLink" placeholder="https://" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                         </div>
+                     </fieldset>
+                      <fieldset class="border p-4 rounded-md">
+                         <legend class="text-lg font-semibold px-2 text-deep-blue-900">Service Details</legend>
+                         <div class="space-y-4 mt-2">
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700">Primary Service Category</label>
+                                 <select name="svcAppCategory" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm bg-white">
+                                     <option value="">Select Category...</option>
+                                     <option value="culinary">Culinary</option>
+                                     <option value="wellness">Wellness & Pampering</option>
+                                     <option value="companionship">Companionship & Social</option>
+                                     <option value="convenience">Convenience & Security</option>
+                                     <option value="professional">Professional & Advisory</option>
+                                     <option value="exclusive">Exclusive Experiences</option>
+                                     <option value="other">Other</option>
+                                 </select>
+                             </div>
+                             <div><label class="block text-sm font-medium text-gray-700">Specific Service(s) Offered</label><input type="text" name="svcAppSpecific" required placeholder="e.g., Deep Tissue Massage, Gourmet Nigerian Cuisine" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                             <div><label class="block text-sm font-medium text-gray-700">Years of Professional Experience</label><input type="number" name="svcAppExp" min="0" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                             <div><label class="block text-sm font-medium text-gray-700">Relevant Certifications/Licenses (Optional)</label><textarea name="svcAppCerts" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="List any relevant qualifications"></textarea></div>
+                         </div>
+                     </fieldset>
+                     <div class="flex items-start"><input id="svc-terms-app" name="svcTerms" type="checkbox" required class="h-4 w-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded mt-1 flex-shrink-0"><label for="svc-terms-app" class="ml-2 block text-sm text-gray-900"> I confirm I meet LuxeStay's professional standards, agree to the vetting process, and accept the <a href="#" class="text-gold-600 hover:underline">Partner Terms & Conditions</a>. </label></div>
+                     <div><button type="submit" class="w-full bg-gold-600 hover:bg-gold-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">Submit Service Application</button></div>
+                 </form>
+             </div>
+        </section>
+
+        <!-- Guest Dashboard Section -->
+        <section id="dashboard-guest" class="page-section">
+            <h1 class="text-4xl font-bold mb-10 text-deep-blue-900">My Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Left Sidebar -->
+                <div class="md:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-deep-blue-900">Guest Menu</h2>
+                    <nav class="space-y-2" id="guest-dashboard-nav">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link active-dashboard-link" data-target="dashboard-guest-bookings"> <i class="fas fa-calendar-check w-5 mr-3 text-gold-600"></i> My Bookings </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-guest-profile"> <i class="fas fa-user-edit w-5 mr-3 text-gold-600"></i> Profile Settings </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-guest-payment"> <i class="fas fa-credit-card w-5 mr-3 text-gold-600"></i> Payment Methods </a>
+                        <a href="#" id="dashboard-guest-logout" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"> <i class="fas fa-sign-out-alt w-5 mr-3 text-gold-600"></i> Logout </a>
+                    </nav>
+                </div>
+                <!-- Right Content Area -->
+                <div class="md:col-span-3 bg-white p-8 rounded-lg shadow-lg min-h-[400px]">
+                    <div id="dashboard-guest-bookings" class="dashboard-view">
+                        <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">My Bookings</h2>
+                        <p class="text-gray-600 mb-4 text-sm">Your apartment stays and service bookings.</p>
+                        <div id="guest-booking-list" class="space-y-4">
+                             <!-- Bookings Loaded by JS -->
+                             <p class="text-gray-500 italic">Loading your bookings...</p>
+                        </div>
+                    </div>
+                    <div id="dashboard-guest-profile" class="dashboard-view hidden">
+                        <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">Profile Settings</h2>
+                        <form class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" value="Guest User" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" value="guest@example.com" disabled class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" placeholder="+234..." class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <button type="submit" class="bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">Save Changes</button>
+                        </form>
+                    </div>
+                    <div id="dashboard-guest-payment" class="dashboard-view hidden">
+                        <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">Payment Methods</h2>
+                        <p class="text-gray-600 mb-4 text-sm">Manage your saved payment methods.</p>
+                        <div class="border rounded-lg p-4 mb-4 flex justify-between items-center bg-gray-50">
+                            <div><p class="font-medium text-sm">**** **** **** 1234 (Visa)</p><p class="text-xs text-gray-500">Expires 12/26</p></div>
+                            <button class="text-red-600 hover:text-red-800 text-xs font-medium">Remove</button>
+                        </div>
+                        <button class="mt-4 border border-gold-600 text-gold-600 hover:bg-gold-600 hover:text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">Add New Card</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Apartment Partner Dashboard Section -->
+        <section id="dashboard-apartment" class="page-section">
+             <h1 class="text-4xl font-bold mb-10 text-deep-blue-900">Apartment Partner Dashboard</h1>
+             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                 <!-- Left Sidebar -->
+                 <div class="md:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                     <h2 class="text-xl font-semibold mb-4 text-deep-blue-900">Partner Menu</h2>
+                     <nav class="space-y-2" id="apartment-dashboard-nav">
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link active-dashboard-link" data-target="dashboard-apartment-listings"><i class="fas fa-list-alt w-5 mr-3 text-gold-600"></i> My Listings</a>
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-apartment-bookings"><i class="fas fa-calendar-check w-5 mr-3 text-gold-600"></i> Bookings</a>
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-apartment-profile"><i class="fas fa-user-edit w-5 mr-3 text-gold-600"></i> Profile</a>
+                         <a href="#" id="dashboard-apartment-logout" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"><i class="fas fa-sign-out-alt w-5 mr-3 text-gold-600"></i> Logout</a>
+                     </nav>
+                 </div>
+                 <!-- Right Content Area -->
+                 <div class="md:col-span-3 bg-white p-8 rounded-lg shadow-lg min-h-[400px]">
+                     <div id="dashboard-apartment-listings" class="dashboard-view">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">My Apartment Listings</h2>
+                         <button class="mb-4 bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">Add New Listing</button>
+                         <div id="apartment-listing-cards" class="space-y-4">
+                            <!-- Listings Loaded by JS -->
+                            <p class="text-gray-500 italic">Loading your listings...</p>
+                         </div>
+                     </div>
+                     <div id="dashboard-apartment-bookings" class="dashboard-view hidden">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">Booking Requests & History</h2>
+                         <div id="apartment-booking-requests" class="space-y-4">
+                             <!-- Booking Requests Loaded by JS -->
+                              <p class="text-gray-500 italic">Loading booking requests...</p>
+                         </div>
+                     </div>
+                     <div id="dashboard-apartment-profile" class="dashboard-view hidden">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">Partner Profile</h2>
+                         <form class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Business/Contact Name</label><input type="text" value="Apartment Partner Example" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Contact Email</label><input type="email" value="aptpartner@example.com" disabled class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" value="+234 801 111 2222" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <h3 class="text-lg font-semibold pt-4 border-t">Payout Information (Example)</h3>
+                            <div><label class="block text-sm font-medium text-gray-700">Bank Name</label><input type="text" value="Example Bank Plc" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Account Number</label><input type="text" value="0123456789" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <button type="submit" class="bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">Save Profile Changes</button>
+                        </form>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Service Partner Dashboard Section -->
+        <section id="dashboard-service" class="page-section">
+            <h1 class="text-4xl font-bold mb-10 text-deep-blue-900">Service Partner Dashboard</h1>
+             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                 <!-- Left Sidebar -->
+                 <div class="md:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                     <h2 class="text-xl font-semibold mb-4 text-deep-blue-900">Partner Menu</h2>
+                     <nav class="space-y-2" id="service-dashboard-nav">
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link active-dashboard-link" data-target="dashboard-service-profile"><i class="fas fa-user-edit w-5 mr-3 text-gold-600"></i> My Profile & Services</a>
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-service-availability"><i class="fas fa-calendar-alt w-5 mr-3 text-gold-600"></i> Availability</a>
+                         <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md dashboard-link" data-target="dashboard-service-bookings"><i class="fas fa-calendar-check w-5 mr-3 text-gold-600"></i> Bookings</a>
+                         <a href="#" id="dashboard-service-logout" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"><i class="fas fa-sign-out-alt w-5 mr-3 text-gold-600"></i> Logout</a>
+                     </nav>
+                 </div>
+                  <!-- Right Content Area -->
+                 <div class="md:col-span-3 bg-white p-8 rounded-lg shadow-lg min-h-[400px]">
+                      <div id="dashboard-service-profile" class="dashboard-view">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">My Service Profile</h2>
+                         <form class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Business/Display Name</label><input type="text" value="Chef Adebola Kitchens" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Specialty</label><input type="text" value="Gourmet Nigerian & Continental Cuisine" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Bio/Description</label><textarea rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">Chef Adebola brings over 10 years of experience...</textarea></div>
+                             <h3 class="text-lg font-semibold pt-4 border-t">Offered Services (Example)</h3>
+                             <div class="border rounded p-3 text-sm">
+                                 <p>Gourmet Private Chef Experience - Price: ₦50,000 base</p>
+                             </div>
+                              <div class="border rounded p-3 text-sm">
+                                 <p>Intimate Dinner Catering - Price: On Request</p>
+                             </div>
+                             <button type="button" class="text-sm border border-gold-600 text-gold-600 hover:bg-gold-600 hover:text-white font-semibold py-1 px-3 rounded-lg transition duration-300">Add/Edit Services</button>
+                            <button type="submit" class="block mt-4 bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">Save Profile Changes</button>
+                         </form>
+                      </div>
+                      <div id="dashboard-service-availability" class="dashboard-view hidden">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">Set Availability</h2>
+                         <p class="text-sm text-gray-600 mb-4">Use the calendar below to block out dates or times you are unavailable for bookings.</p>
+                         <div class="mt-4 p-4 border rounded-lg bg-gray-100 text-center text-gray-500 min-h-[200px]">
+                            (Interactive Calendar Component Would Go Here)
+                         </div>
+                      </div>
+                      <div id="dashboard-service-bookings" class="dashboard-view hidden">
+                         <h2 class="text-2xl font-semibold mb-4 text-deep-blue-900">My Bookings</h2>
+                         <div id="service-booking-list" class="space-y-4">
+                            <!-- Bookings Loaded by JS -->
+                            <p class="text-gray-500 italic">Loading your bookings...</p>
+                         </div>
+                      </div>
+                 </div>
+             </div>
+        </section>
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-deep-blue-900 text-blue-100 py-10 mt-16">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+            <div>
+                <h3 class="font-semibold mb-3 uppercase tracking-wider text-sm">LuxeStay Services</h3>
+                <p class="text-xs text-blue-200 leading-relaxed">Premium shortlets and curated on-demand services across Nigeria.</p>
+            </div>
+             <div>
+                <h3 class="font-semibold mb-3 uppercase tracking-wider text-sm">Quick Links</h3>
+                <nav class="space-y-1 text-xs">
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="home">Home</a>
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="apartments">Apartments</a>
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="services">Services</a>
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="about">About Us</a>
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="contact">Contact</a>
+                </nav>
+            </div>
+             <div>
+                <h3 class="font-semibold mb-3 uppercase tracking-wider text-sm">Partners</h3>
+                <nav class="space-y-1 text-xs">
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="partner">Become a Partner</a>
+                    <a href="#" class="hover:text-gold-600 block nav-link" data-target="login">Partner Login</a>
+                </nav>
+            </div>
+             <div>
+                <h3 class="font-semibold mb-3 uppercase tracking-wider text-sm">Legal</h3>
+                 <nav class="space-y-1 text-xs">
+                    <a href="#" class="hover:text-gold-600 block">Privacy Policy</a>
+                    <a href="#" class="hover:text-gold-600 block">Terms of Service</a>
+                 </nav>
+            </div>
+        </div>
+        <div class="container mx-auto px-6 text-center text-xs text-blue-300 border-t border-blue-800 pt-6 mt-8">
+            &copy; 2025 LuxeStay Services. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="booking-confirmation-modal" class="modal">
+         <div class="modal-content text-center">
+            <span class="modal-close" id="booking-modal-close-button">&times;</span>
+            <div class="text-green-500 text-4xl mb-4"><i class="fas fa-check-circle"></i></div>
+            <h2 class="text-2xl font-semibold text-deep-blue-900 mb-4">Request Received!</h2>
+            <p id="booking-modal-message" class="text-gray-700 mb-6 text-sm">Your booking request has been successfully submitted. We will confirm availability and contact you shortly.</p>
+            <button id="booking-modal-ok-button" class="bg-gold-600 hover:bg-gold-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300 text-sm">OK</button>
+        </div>
+    </div>
+
+    <div id="add-review-modal" class="modal">
+        <div class="modal-content">
+             <span class="modal-close" id="review-modal-close-button">&times;</span>
+             <h2 class="text-2xl font-semibold text-deep-blue-900 mb-4">Write a Review for <span id="review-modal-item-name">Service/Apartment</span></h2>
+             <form id="review-form" class="space-y-4">
+                 <input type="hidden" id="review-item-id" name="item-id"> <!-- Can be serviceId or apartmentId -->
+                 <input type="hidden" id="review-item-type" name="item-type"> <!-- 'service' or 'apartment' -->
+                 <input type="hidden" id="review-booking-id" name="booking-id"> <!-- Optional: Link review to booking -->
+                 <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-1">Your Rating</label>
+                     <div id="review-star-rating" class="star-rating text-2xl">
+                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                     </div>
+                     <input type="hidden" id="review-rating-value" name="rating" required>
+                 </div>
+                 <div>
+                     <label for="review-text" class="block text-sm font-medium text-gray-700">Your Review</label>
+                     <textarea id="review-text" name="review-text" rows="4" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-gold-600 focus:border-gold-600 text-sm" placeholder="Share your experience..."></textarea>
+                 </div>
+                 <div id="review-feedback" class="text-red-600 text-sm hidden p-3 bg-red-50 border border-red-200 rounded-md"></div>
+                 <div class="text-right">
+                     <button type="submit" class="bg-gold-600 hover:bg-gold-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300 text-sm">Submit Review</button>
+                 </div>
+             </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Main Application JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("LuxeStay Initializing...");
+
+            // --- State Variables ---
+            let isLoggedIn = false;
+            let userType = 'guest'; // guest, apartment_vendor, service_provider
+            let currentUser = null; // To store user data upon login simulation
+            let currentServiceIdForDetail = null;
+            let currentApartmentIdForDetail = null;
+            let currentProviderIdForDetail = null; // To know which provider profile we are viewing
+            let currentRating = 0; // For review modal stars
+            let apartmentMapInstance = null; // To hold the Leaflet map instance
+
+            // --- Element References ---
+            const allNavLinks = document.querySelectorAll('.nav-link');
+            const pageSections = document.querySelectorAll('.page-section');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            // Search/Filter Elements
+            const serviceSearchInputPage = document.getElementById('service-search-input-page');
+            const serviceCategoryFilterPage = document.getElementById('service-category-filter-page');
+            const serviceGridContainerPage = document.getElementById('service-grid-container-page');
+            const noServicesMessagePage = document.getElementById('no-services-message-page');
+            const apartmentSearchInput = document.getElementById('apartment-search-input');
+            const apartmentBedroomsFilter = document.getElementById('apartment-bedrooms-filter');
+            const apartmentGridContainer = document.getElementById('apartment-grid-container');
+            const noApartmentsMessage = document.getElementById('no-apartments-message');
+            const featuredApartmentsContainer = document.getElementById('featured-apartments-container');
+            // Modals & Content
+            const bookingConfirmationModal = document.getElementById('booking-confirmation-modal');
+            const bookingModalCloseButton = document.getElementById('booking-modal-close-button');
+            const bookingModalOkButton = document.getElementById('booking-modal-ok-button');
+            const bookingModalMessage = document.getElementById('booking-modal-message');
+            const addReviewModal = document.getElementById('add-review-modal');
+            const reviewModalCloseButton = document.getElementById('review-modal-close-button');
+            const reviewModalItemName = document.getElementById('review-modal-item-name'); // Updated ID
+            const reviewForm = document.getElementById('review-form');
+            const reviewStarRatingContainer = document.getElementById('review-star-rating');
+            const reviewRatingValueInput = document.getElementById('review-rating-value');
+            const reviewTextInput = document.getElementById('review-text');
+            const reviewFeedback = document.getElementById('review-feedback');
+            const reviewItemIdInput = document.getElementById('review-item-id'); // Updated ID
+            const reviewItemTypeInput = document.getElementById('review-item-type'); // Updated ID
+            const reviewBookingIdInput = document.getElementById('review-booking-id');
+            // Forms & Feedback
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const contactForm = document.getElementById('contact-form');
+            const loginFeedback = document.getElementById('login-feedback');
+            const signupFeedback = document.getElementById('signup-feedback');
+            const applyApartmentForm = document.getElementById('apply-apartment-form');
+            const applyServiceForm = document.getElementById('apply-service-form');
+            const applyApartmentFeedback = document.getElementById('apply-apartment-feedback');
+            const applyServiceFeedback = document.getElementById('apply-service-feedback');
+            // Nav Items (Login State)
+            const loggedOutNavItems = ['nav-login', 'nav-signup', 'mobile-nav-login', 'mobile-nav-signup'];
+            const loggedInNavItems = ['nav-dashboard', 'nav-logout', 'mobile-nav-dashboard', 'mobile-nav-logout'];
+            // Note: Logout buttons themselves are handled separately via IDs/classes
+            // Dashboard Elements
+            const guestDashboardNav = document.getElementById('guest-dashboard-nav');
+            const guestDashboardViews = document.querySelectorAll('#dashboard-guest .dashboard-view');
+            const apartmentDashboardNav = document.getElementById('apartment-dashboard-nav');
+            const apartmentDashboardViews = document.querySelectorAll('#dashboard-apartment .dashboard-view');
+            const serviceDashboardNav = document.getElementById('service-dashboard-nav');
+            const serviceDashboardViews = document.querySelectorAll('#dashboard-service .dashboard-view');
+            // Service Detail Provider List
+            const serviceProvidersListContainer = document.getElementById('service-providers-list');
+            // Provider Profile Back Button
+            const providerBackButton = document.getElementById('provider-back-button');
+
+            // --- Simulated Data ---
+
+            // Reviews Data
+             const reviewsData = {
+                'apt-lekki-penthouse': [
+                    { rating: 5, name: 'Bola A.', text: 'Absolutely stunning apartment! The views are breathtaking and the service was top-notch.' },
+                    { rating: 4, name: 'Mr. Chukwudi', text: 'Very comfortable stay. Pool area is lovely. Minor issue with WiFi speed initially but resolved quickly.' }
+                ],
+                'apt-ikoyi-suite': [
+                     { rating: 5, name: 'Aisha K.', text: 'Perfect for my business trip. Clean, quiet, and centrally located. Will book again.' }
+                ],
+                'chef-gourmet': [ { rating: 5, name: 'Adeola B.', text: 'Absolutely incredible! Chef was professional, the food was divine, and the cleanup was spotless. Worth every naira!' }, { rating: 4, name: 'Tunde A.', text: 'Very good experience. Food was great, though one dish was slightly different than discussed. Would use again.' } ],
+                'massage-deep': [ { rating: 5, name: 'Chidi O.', text: 'Exactly what I needed after a long week. The therapist found all the knots. Felt amazing afterwards.' }, { rating: 5, name: 'Aisha K.', text: 'Professional, punctual, and gave a fantastic deep tissue massage. Highly recommend Serenity Mobile Spa.' }, { rating: 4, name: 'David L.', text: 'Good massage, very relaxing. Pressure was perfect.' } ],
+                'chauffeur-luxury': [ { rating: 5, name: 'Mr. Eze', text: 'Impeccable service. Driver was courteous and the car was spotless. Made my business trip much smoother.' } ],
+                'security-detail': [ { rating: 5, name: 'Senator Bello', text: 'Discreet and highly professional team. Felt secure throughout my visit.' } ],
+             };
+
+            // Service Data
+            const serviceDetailsData = {
+                'chef-gourmet': { id: 'chef-gourmet', category: 'Culinary', title: 'Gourmet Private Chef Experience', price: 'From ₦50,000', duration: 'Approx. 3-4 hours', description: 'Indulge in a bespoke multi-course dining experience crafted by a professional chef in the comfort of your shortlet. Perfect for special occasions or simply treating yourself. Includes menu consultation, ingredient sourcing, cooking, serving, and cleanup.', keywords: 'chef gourmet food cooking culinary dinner private', img: 'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'massage-deep': { id: 'massage-deep', category: 'Wellness', title: 'Deep Tissue Massage Therapy', price: 'From ₦25,000 / 60 mins', duration: '60 / 90 minutes options', description: 'Relieve muscle tension, reduce stress, and improve circulation with a professional deep tissue massage delivered by a certified therapist using specialized techniques.', keywords: 'massage spa wellness deep tissue relax therapy body', img: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'friend-gist': { id: 'friend-gist', category: 'Companionship & Social', title: 'FriendToGist Companion', price: 'From ₦15,000 / hour', duration: 'Minimum 2 hours', description: 'Enjoy engaging conversation, get local insights, or have a friendly companion for casual, non-intimate outings (e.g., coffee, museum visit). Boundaries are clearly defined and respected. Provider is vetted for safety and conversational skills.', keywords: 'friend companion gist conversation chat social company', img: 'https://images.unsplash.com/photo-1519340241574-2cec6aef0c05?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'cuddler-pro': { id: 'cuddler-pro', category: 'Wellness', title: 'Professional Cuddler', price: 'From ₦20,000 / hour', duration: '60 / 90 / 120 minutes options', description: 'Experience the therapeutic benefits of platonic touch with a trained and vetted professional cuddler. Focuses on comfort, relaxation, and non-sexual companionship.', keywords: 'cuddler professional cuddle wellness comfort therapeutic platonic touch', img: 'https://images.unsplash.com/photo-1587039012699-a14745e8479a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'chauffeur-luxury': { id: 'chauffeur-luxury', category: 'Convenience & Security', title: 'Luxury Chauffeur Service', price: 'From ₦30,000 / trip (within city)', duration: 'Varies by trip', description: 'Travel in style and comfort with our professional, discreet chauffeurs and premium vehicles. Ideal for airport transfers, business meetings, or exploring the city.', keywords: 'chauffeur car driver transport luxury convenience travel security', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'mixologist-home': { id: 'mixologist-home', category: 'Culinary', title: 'In-Home Mixologist', price: 'From ₦40,000 / event (up to 3 hours)', duration: 'Typically 2-4 hours', description: 'Elevate your gathering with a professional mixologist crafting bespoke cocktails. Includes consultation, basic bar setup, and expert drink preparation. (Ingredients cost may be separate).', keywords: 'mixologist bartender drinks cocktails party culinary event', img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'security-detail': { id: 'security-detail', category: 'Convenience & Security', title: 'Executive Security Detail', price: 'Price on Request', duration: 'Varies (Hourly/Daily)', description: 'Ensure your safety and peace of mind with highly trained, professional, and discreet executive protection personnel. Suitable for individuals, families, or events. Vetting process is rigorous.', keywords: 'security guard protection executive personnel safety convenience secure bodyguard', img: 'https://images.unsplash.com/photo-1560440021-33f9b867899d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'celebrity-hangout': { id: 'celebrity-hangout', category: 'Exclusive Experiences', title: 'Celebrity Hangout Request', price: 'Price on Request', duration: 'Varies', description: 'Submit a request to arrange a curated, private experience or appearance with a notable Nigerian personality (musician, actor, influencer, etc.). Subject to availability, specific terms, background checks, and agreement by all parties. Significant lead time required. Non-refundable consultation fee may apply.', keywords: 'celebrity hangout meet greet exclusive experience social vip famous personality', img: 'https://images.unsplash.com/photo-1517940310602-8a3c18ae3873?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'pastor-imam': { id: 'pastor-imam', category: 'Professional & Advisory', title: 'Spiritual Advisor (Pastor/Imam)', price: 'From ₦20,000 / hour', duration: '60 minutes sessions', description: 'Connect with vetted, qualified pastors or imams for confidential spiritual guidance, counseling, or conversation. Respectful, non-judgmental support. This service is advisory and does not replace regular religious community involvement.', keywords: 'pastor imam spiritual advisor religious guidance support professional consultation counseling faith', img: 'https://images.unsplash.com/photo-1588431801193-9f1f4f6f6d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' },
+                'doctor-consult': { id: 'doctor-consult', category: 'Professional & Advisory', title: 'Doctor Consultation (Non-Emergency)', price: 'From ₦35,000 / consultation', duration: 'Approx. 30-45 minutes', description: 'Schedule a virtual or in-person consultation with a licensed Nigerian physician for non-urgent medical advice, health discussions, or second opinions. **This service is NOT for emergencies.** All doctors are verified.', keywords: 'doctor medical consultation health wellness professional advisory physician gp visit non-emergency', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80' }
+            };
+
+            // Provider Data (Assign services explicitly)
+            const providerData = {
+                'prov-chef-adebola': { id: 'prov-chef-adebola', name: 'Chef Adebola Kitchens', specialty: 'Gourmet Nigerian & Continental Cuisine', bio: 'Chef Adebola brings over 10 years of experience crafting unforgettable culinary journeys. Specializes in fusion dishes and elegant presentation.', services: ['Gourmet Private Chef Experience', 'Intimate Dinner Catering'], img: 'https://placehold.co/150x150/1e3a8a/ffffff?text=Chef+A' },
+                'prov-chef-bisi': { id: 'prov-chef-bisi', name: 'Bisi\'s Bites Catering', specialty: 'Authentic Nigerian Cuisine Expert', bio: 'Passionate about traditional flavors with a modern twist. Known for exceptional Jollof Rice and small chops.', services: ['Gourmet Private Chef Experience'], img: 'https://placehold.co/150x150/047857/ffffff?text=Chef+B' },
+                'prov-serenity-spa': { id: 'prov-serenity-spa', name: 'Serenity Mobile Spa', specialty: 'Mobile Massage & Wellness Therapies', bio: 'A collective of certified therapists bringing tranquility to your doorstep. We use only premium oils and techniques.', services: ['Deep Tissue Massage Therapy', 'Swedish Massage', 'Aromatherapy Massage'], img: 'https://placehold.co/150x150/ca8a04/ffffff?text=Spa' },
+                'prov-zenith-wellness': { id: 'prov-zenith-wellness', name: 'Zenith Wellness Professionals', specialty: 'Holistic Mobile Spa Services', bio: 'Experienced therapists offering a range of treatments focused on relaxation and rejuvenation.', services: ['Deep Tissue Massage Therapy', 'Hot Stone Massage'], img: 'https://placehold.co/150x150/7c3aed/ffffff?text=Zenith' },
+                'prov-companion-net': { id: 'prov-companion-net', name: 'Verified Companion Network', specialty: 'Professional Companionship Services', bio: 'Our network consists of carefully selected individuals skilled in conversation and providing pleasant, platonic company.', services: ['FriendToGist Companion', 'Event Companion (Non-intimate)'], img: 'https://placehold.co/150x150/6d28d9/ffffff?text=VCN' },
+                'prov-comfort-comp': { id: 'prov-comfort-comp', name: 'Comfort Companions NG', specialty: 'Therapeutic Platonic Touch', bio: 'Certified professional cuddlers trained in providing safe, consensual, non-sexual touch for relaxation and comfort.', services: ['Professional Cuddler'], img: 'https://placehold.co/150x150/ec4899/ffffff?text=CC' },
+                'prov-elite-drive': { id: 'prov-elite-drive', name: 'Elite Drive Services', specialty: 'Luxury Transportation', bio: 'Providing premium chauffeur services with a fleet of luxury vehicles and highly professional, vetted drivers.', services: ['Luxury Chauffeur Service', 'Airport Transfers', 'Corporate Travel'], img: 'https://placehold.co/150x150/4b5563/ffffff?text=EDS' },
+                'prov-prestige-wheels': { id: 'prov-prestige-wheels', name: 'Prestige Wheels NG', specialty: 'Executive Chauffeur Solutions', bio: 'Discreet and reliable transportation for executives and VIPs. Focus on punctuality and comfort.', services: ['Luxury Chauffeur Service'], img: 'https://placehold.co/150x150/111827/ffffff?text=PW' },
+                'prov-cocktail-craft': { id: 'prov-cocktail-craft', name: 'The Cocktail Craftsmen', specialty: 'Mobile Mixology & Bar Services', bio: 'Experienced mixologists passionate about creating unique cocktails and providing exceptional bar service for your events.', services: ['In-Home Mixologist', 'Event Bar Catering'], img: 'https://placehold.co/150x150/059669/ffffff?text=TCC' },
+                'prov-secure-exec': { id: 'prov-secure-exec', name: 'SecureExec Protection', specialty: 'Executive Security Services', bio: 'Highly trained ex-military and law enforcement professionals providing discreet, effective security solutions for individuals and events.', services: ['Executive Security Detail', 'Event Security', 'Risk Assessment'], img: 'https://placehold.co/150x150/1f2937/ffffff?text=SEP' },
+                'prov-guardian-shield': { id: 'prov-guardian-shield', name: 'Guardian Shield Security', specialty: 'Close Protection & Asset Security', bio: 'Comprehensive security services tailored to client needs, utilizing advanced techniques and experienced personnel.', services: ['Executive Security Detail'], img: 'https://placehold.co/150x150/7f1d1d/ffffff?text=GSS' },
+                'prov-vip-access': { id: 'prov-vip-access', name: 'VIP Access Curators', specialty: 'Exclusive Experience Management', bio: 'Connecting clients with unique opportunities and high-profile individuals through established networks. Discretion and bespoke planning are key.', services: ['Celebrity Hangout Request', 'Exclusive Event Access'], img: 'https://placehold.co/150x150/7c3aed/ffffff?text=VIP' },
+                'prov-interfaith': { id: 'prov-interfaith', name: 'Interfaith Spiritual Advisors', specialty: 'Spiritual Guidance & Counseling', bio: 'A network of vetted and respected Pastors and Imams offering confidential support and guidance across different faiths.', services: ['Spiritual Advisor (Pastor/Imam)', 'Pastoral Counseling'], img: 'https://placehold.co/150x150/854d0e/ffffff?text=ISA' },
+                'prov-luxecare': { id: 'prov-luxecare', name: 'LuxeCare Medical Consultants', specialty: 'Non-Emergency Medical Consultations', bio: 'Access to licensed Nigerian physicians for convenient virtual or in-person consultations for non-urgent health matters. Strict confidentiality maintained.', services: ['Doctor Consultation (Non-Emergency)', 'Health Advisory'], img: 'https://placehold.co/150x150/be123c/ffffff?text=LMC' }
+            };
+
+            // Apartment Data (Added coordinates for map)
+            const apartmentData = {
+                'apt-lekki-penthouse': {
+                    id: 'apt-lekki-penthouse', title: 'Lekki Luxury Penthouse', location: 'Lekki Phase 1, Lagos', price: 150000, bedrooms: 3, bathrooms: 4, guests: 6, featured: true,
+                    description: 'Stunning penthouse with panoramic ocean views, private pool, and state-of-the-art amenities. Perfect for families or groups seeking ultimate luxury.',
+                    amenities: ['Private Pool', 'Ocean View', 'Fully Equipped Kitchen', 'High-Speed WiFi', 'Air Conditioning', 'Smart TV (Netflix)', '24/7 Security', 'Gym Access', 'Daily Housekeeping'],
+                    img: 'https://images.unsplash.com/photo-1613553571599-6cc11d633b1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                    coords: { lat: 6.4325, lng: 3.4420 } // Example coordinates for Lekki Phase 1
+                },
+                 'apt-ikoyi-suite': {
+                    id: 'apt-ikoyi-suite', title: 'Executive Suite in Ikoyi', location: 'Ikoyi, Lagos', price: 95000, bedrooms: 1, bathrooms: 1, guests: 2, featured: true,
+                    description: 'Elegant and modern 1-bedroom suite in a prestigious Ikoyi neighborhood. Ideal for business travelers or couples. Includes access to building amenities like pool and gym.',
+                    amenities: ['WiFi', 'Air Conditioning', 'Kitchenette', 'Gym Access', 'Swimming Pool (Communal)', 'Secure Parking', 'Workspace'],
+                    img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                    coords: { lat: 6.4585, lng: 3.4321 } // Example coordinates for Ikoyi
+                },
+                 'apt-abuja-villa': {
+                    id: 'apt-abuja-villa', title: 'Serene 4-Bedroom Villa', location: 'Asokoro, Abuja', price: 180000, bedrooms: 4, bathrooms: 5, guests: 8, featured: true,
+                    description: 'Spacious and private villa in a secure estate in Asokoro. Features a large garden, modern interiors, and dedicated staff quarters (staff not included). Ideal for families.',
+                    amenities: ['Private Garden', 'Fully Equipped Kitchen', 'WiFi', 'Air Conditioning', '24/7 Security', 'Backup Generator', 'DSTV Premium', 'Secure Parking'],
+                    img: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                    coords: { lat: 9.0538, lng: 7.5178 } // Example coordinates for Asokoro
+                },
+                 'apt-vi-studio': {
+                    id: 'apt-vi-studio', title: 'Chic Studio Apartment', location: 'Victoria Island, Lagos', price: 70000, bedrooms: 1, bathrooms: 1, guests: 2, featured: false,
+                    description: 'Stylish studio in the heart of VI, close to restaurants and business hubs. Compact yet comfortable and well-equipped for short stays.',
+                    amenities: ['WiFi', 'Air Conditioning', 'Kitchenette', 'Smart TV', '24/7 Security', 'Elevator Access'],
+                    img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                    coords: { lat: 6.4300, lng: 3.4150 } // Example coordinates for VI
+                }
+            };
+
+
+            // --- Helper Functions ---
+
+            // Update Nav based on login state and user type
+            function updateNavAppearance() {
+                loggedOutNavItems.forEach(id => document.getElementById(id)?.classList.toggle('hidden', isLoggedIn));
+                loggedInNavItems.forEach(id => document.getElementById(id)?.classList.toggle('hidden', !isLoggedIn));
+
+                // Adjust dashboard link text based on user type if needed (optional)
+                const dashboardLink = document.getElementById('nav-dashboard');
+                 if (dashboardLink && isLoggedIn) {
+                    /* Example: Customize text - but simpler to just use "Dashboard"
+                    switch(userType) {
+                        case 'apartment_vendor': dashboardLink.textContent = 'Partner Dashboard'; break;
+                        case 'service_provider': dashboardLink.textContent = 'Provider Dashboard'; break;
+                        default: dashboardLink.textContent = 'My Dashboard'; break;
+                    } */
+                 }
+            }
+
+            // Generate star HTML string
+            function generateStarRatingHTML(rating, maxStars = 5) {
+                let starsHTML = '';
+                const roundedRating = Math.round(rating * 2) / 2; // Round to nearest 0.5
+                for (let i = 1; i <= maxStars; i++) {
+                    if (i <= roundedRating) {
+                        starsHTML += '<i class="fas fa-star"></i>'; // Full star
+                    } else if (i - 0.5 === roundedRating) {
+                        starsHTML += '<i class="fas fa-star-half-alt"></i>'; // Half star
+                    } else {
+                        starsHTML += '<i class="far fa-star"></i>'; // Empty star
+                    }
+                }
+                return starsHTML;
+            }
+
+            // Calculate Average Rating (Generic for Service or Apartment)
+            function calculateAverageRating(itemId) {
+                const reviews = reviewsData[itemId] || [];
+                if (reviews.length === 0) return 0;
+                const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+                return totalRating / reviews.length;
+            }
+
+            // Display Reviews (Generic for Service or Apartment)
+            function displayReviews(containerElementId, itemId) {
+                const reviewsContainer = document.getElementById(containerElementId);
+                if (!reviewsContainer) return;
+                reviewsContainer.innerHTML = ''; // Clear previous
+
+                const relevantReviews = reviewsData[itemId] || [];
+
+                if (relevantReviews.length > 0) {
+                    relevantReviews.forEach(review => {
+                        const reviewElement = document.createElement('div');
+                        reviewElement.className = 'border-t pt-4 first:border-t-0'; // No top border for the first review
+                        reviewElement.innerHTML = `
+                            <div class="flex items-center mb-1">
+                                <span class="display-stars text-sm mr-2">${generateStarRatingHTML(review.rating)}</span>
+                                <span class="font-semibold text-sm text-deep-blue-900">${review.name || 'Anonymous'}</span>
+                            </div>
+                            <p class="text-gray-600 italic text-sm">${review.text}</p>`;
+                        reviewsContainer.appendChild(reviewElement);
+                    });
+                } else {
+                    reviewsContainer.innerHTML = '<p class="text-gray-500 italic text-sm">No reviews yet.</p>';
+                }
+            }
+
+            // Display Reviews for Provider (Aggregates from their services)
+             function displayProviderReviews(containerElementId, providerId) {
+                 const reviewsContainer = document.getElementById(containerElementId);
+                 if (!reviewsContainer) return;
+                 reviewsContainer.innerHTML = ''; // Clear previous
+
+                 const relevantReviews = [];
+                 // Find services associated with this provider
+                 const providerServiceIds = Object.keys(serviceDetailsData).filter(sId => {
+                    // Check if this provider is explicitly listed for the service (complex link needed in real app)
+                    // Simplified: Check if provider is in the (simulated) list of providers for that service
+                    const service = serviceDetailsData[sId];
+                    // Find providers offering this service
+                    const providersForService = Object.entries(providerData).filter(([pId, pData]) =>
+                        pData.services.includes(service.title)
+                    ).map(([pId, pData]) => pId);
+                    return providersForService.includes(providerId);
+                 });
+
+
+                 providerServiceIds.forEach(provSvcId => {
+                     if(reviewsData[provSvcId]) {
+                         // Add service name to the review text for context
+                         reviewsData[provSvcId].forEach(review => {
+                             relevantReviews.push({ ...review, serviceName: serviceDetailsData[provSvcId].title });
+                         });
+                     }
+                 });
+
+                 if (relevantReviews.length > 0) {
+                     // Optional: Sort reviews by date if available, otherwise display as found
+                     relevantReviews.forEach(review => {
+                         const reviewElement = document.createElement('div');
+                         reviewElement.className = 'border-t pt-4 first:border-t-0';
+                         reviewElement.innerHTML = `
+                             <div class="flex items-center mb-1 justify-between">
+                                 <div>
+                                     <span class="display-stars text-sm mr-2">${generateStarRatingHTML(review.rating)}</span>
+                                     <span class="font-semibold text-sm text-deep-blue-900">${review.name || 'Anonymous'}</span>
+                                 </div>
+                                 ${review.serviceName ? `<span class="text-xs text-gray-400">For: ${review.serviceName}</span>` : ''}
+                             </div>
+                             <p class="text-gray-600 italic text-sm">${review.text}</p>`;
+                         reviewsContainer.appendChild(reviewElement);
+                     });
+                 } else {
+                     reviewsContainer.innerHTML = '<p class="text-gray-500 italic text-sm">No reviews yet for this provider.</p>';
+                 }
+            }
+
+
+            // --- Page Navigation & Display ---
+
+            // Show Page Section
+            function showPage(targetId, skipScroll = false) {
+                console.log(`Attempting to show page: ${targetId}`); // Debugging
+                pageSections.forEach(section => section.style.display = 'none');
+                const targetSection = document.getElementById(targetId);
+
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    if (!skipScroll) window.scrollTo(0, 0);
+                    console.log(`Page ${targetId} displayed.`); // Debugging
+                } else {
+                    console.warn(`Target section "${targetId}" not found. Falling back to home.`);
+                    document.getElementById('home').style.display = 'block';
+                    targetId = 'home';
+                }
+
+                // Update nav link active states
+                allNavLinks.forEach(link => {
+                    link.classList.remove('nav-link-active');
+                    // Check if the link's target matches the currently shown page ID
+                    if (link.dataset.target === targetId ||
+                        (targetId.startsWith('dashboard-') && link.dataset.target === 'dashboard')) { // Highlight 'Dashboard' link for any dashboard page
+                        link.classList.add('nav-link-active');
+                    }
+                });
+                 // Specifically handle the logo link for home active state
+                document.querySelector('header a.nav-link[data-target="home"]')?.classList.toggle('nav-link-active', targetId === 'home');
+
+
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden');
+
+                // Handle dashboard display if 'dashboard' is the target
+                if (targetId === 'dashboard') {
+                    if (isLoggedIn) {
+                        showDashboardBasedOnUserType();
+                    } else {
+                        showPage('login'); // Redirect to login
+                    }
+                }
+
+                // Initialize map only if the apartment detail page is shown
+                if (targetId === 'apartment-detail' && currentApartmentIdForDetail) {
+                    const apt = apartmentData[currentApartmentIdForDetail];
+                    if (apt && apt.coords) {
+                        initMap('apartment-map', apt.coords.lat, apt.coords.lng, apt.title);
+                    } else {
+                         // Handle case where coordinates are missing or map element isn't ready
+                         const mapContainer = document.getElementById('apartment-map');
+                         if(mapContainer) mapContainer.innerHTML = '<p class="text-center text-gray-500 p-4">Map data unavailable.</p>';
+                    }
+                } else {
+                    // If navigating away from apartment detail, remove the map instance to prevent issues
+                    if (apartmentMapInstance) {
+                        console.log("Removing map instance");
+                        apartmentMapInstance.remove();
+                        apartmentMapInstance = null;
+                    }
+                     // Clear map container if it exists but shouldn't show a map
+                     const mapDiv = document.getElementById('apartment-map');
+                     if (mapDiv && targetId !== 'apartment-detail') {
+                         mapDiv.innerHTML = ''; // Clear potential error messages or old map tiles
+                     }
+                }
+            }
+
+             // Show Dashboard based on userType
+             function showDashboardBasedOnUserType() {
+                console.log("Routing to dashboard for user type:", userType);
+                // Ensure other dashboards are hidden first
+                document.getElementById('dashboard-guest').style.display = 'none';
+                document.getElementById('dashboard-apartment').style.display = 'none';
+                document.getElementById('dashboard-service').style.display = 'none';
+
+                switch (userType) {
+                    case 'apartment_vendor':
+                        showPage('dashboard-apartment', true); // Show the container page
+                        // Show the default view within this dashboard
+                        showDashboardView('dashboard-apartment-listings', apartmentDashboardNav?.querySelectorAll('.dashboard-link'), apartmentDashboardViews);
+                        loadApartmentPartnerDashboardData(); // Load initial data
+                        break;
+                    case 'service_provider':
+                        showPage('dashboard-service', true);
+                        showDashboardView('dashboard-service-profile', serviceDashboardNav?.querySelectorAll('.dashboard-link'), serviceDashboardViews);
+                        loadServiceProviderDashboardData();
+                        break;
+                    case 'guest':
+                    default:
+                        showPage('dashboard-guest', true);
+                        showDashboardView('dashboard-guest-bookings', guestDashboardNav?.querySelectorAll('.dashboard-link'), guestDashboardViews);
+                        loadGuestDashboardData();
+                        break;
+                }
+            }
+
+             // Generic function to switch views within a specific dashboard
+             function showDashboardView(targetViewId, dashboardLinks, dashboardViews) {
+                 if (!dashboardLinks || !dashboardViews) return;
+
+                 dashboardViews.forEach(view => view.classList.add('hidden'));
+                 const targetView = document.getElementById(targetViewId);
+
+                 if (targetView) {
+                     targetView.classList.remove('hidden');
+                 } else {
+                     // Fallback to the first view if target not found
+                     if (dashboardViews.length > 0) dashboardViews[0].classList.remove('hidden');
+                     targetViewId = dashboardViews.length > 0 ? dashboardViews[0].id : '';
+                     console.warn(`Dashboard view "${targetViewId}" not found, showing default.`);
+                 }
+
+                 // Update active link state within the specific dashboard nav
+                 dashboardLinks.forEach(link => {
+                     link.classList.remove('active-dashboard-link', 'bg-gray-100', 'text-gold-600', 'font-semibold');
+                     if (link.dataset.target === targetViewId) {
+                         link.classList.add('active-dashboard-link', 'bg-gray-100', 'text-gold-600', 'font-semibold');
+                     }
+                 });
+             }
+
+            // --- Dynamic Content Loading Functions ---
+
+            // Load and Display Apartments (Main Listing & Featured)
+            function displayApartments(filterTerm = '', bedroomsFilter = '') {
+                const container = apartmentGridContainer; // Main grid
+                const noResultsMsg = noApartmentsMessage;
+                if (!container) return;
+                container.innerHTML = ''; // Clear existing
+                let itemsFound = false;
+                const searchTerm = filterTerm.toLowerCase();
+                const bedrooms = parseInt(bedroomsFilter);
+
+                Object.entries(apartmentData).forEach(([id, apt]) => {
+                    const locationMatch = !searchTerm || apt.location.toLowerCase().includes(searchTerm) || apt.title.toLowerCase().includes(searchTerm);
+                    const bedroomMatch = !bedroomsFilter || (bedroomsFilter === '5+' ? apt.bedrooms >= 5 : apt.bedrooms === bedrooms);
+
+                    if (locationMatch && bedroomMatch) {
+                        itemsFound = true;
+                        const card = createApartmentCard(id, apt);
+                        container.appendChild(card);
+                    }
+                });
+                if (noResultsMsg) noResultsMsg.style.display = itemsFound ? 'none' : 'block';
+            }
+
+            function displayFeaturedApartments() {
+                 const container = featuredApartmentsContainer;
+                 if (!container) return;
+                 container.innerHTML = ''; // Clear
+                 let count = 0;
+                 Object.entries(apartmentData).forEach(([id, apt]) => {
+                     if (apt.featured && count < 3) { // Show max 3 featured
+                         count++;
+                         const card = createApartmentCard(id, apt, true); // Mark as featured style if needed
+                         container.appendChild(card);
+                     }
+                 });
+                  if (count === 0) {
+                     container.innerHTML = '<p class="text-center text-gray-500 col-span-full text-sm">No featured apartments available currently.</p>';
+                 }
+             }
+
+            // Helper to create an apartment card element
+            function createApartmentCard(id, apt, isFeatured = false) {
+                const card = document.createElement('div');
+                card.className = 'item-card cursor-pointer nav-link'; // Add nav-link for navigation handling
+                card.dataset.target = 'apartment-detail';
+                card.dataset.apartmentId = id;
+                card.innerHTML = `
+                    <img src="${apt.img}" alt="${apt.title}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/a0aec0?text=Image+Error'">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-1 text-deep-blue-900 truncate">${apt.title}</h3>
+                        <p class="text-xs text-gray-500 mb-2"><i class="fas fa-map-marker-alt mr-1 text-gold-600"></i>${apt.location}</p>
+                        <p class="text-base font-semibold text-deep-blue-900">₦${apt.price.toLocaleString()}/night</p>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <span>${apt.bedrooms} Bed${apt.bedrooms > 1 ? 's' : ''}</span> &bull;
+                            <span>${apt.bathrooms} Bath${apt.bathrooms > 1 ? 's' : ''}</span> &bull;
+                            <span>${apt.guests} Guest${apt.guests > 1 ? 's' : ''}</span>
+                        </div>
+                    </div>`;
+                return card;
+            }
+
+
+            // Show Apartment Detail Page
+            function showApartmentDetail(apartmentId) {
+                const apt = apartmentData[apartmentId];
+                currentApartmentIdForDetail = apartmentId; // Store globally
+                if (apt) {
+                    document.getElementById('apartment-detail-title').textContent = apt.title;
+                    document.getElementById('apartment-detail-location').innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-gold-600"></i> ${apt.location}`;
+                    document.getElementById('apartment-detail-price').textContent = `₦${apt.price.toLocaleString()} / night`;
+                    document.getElementById('apartment-detail-bedrooms').innerHTML = `<i class="fas fa-bed mr-1 text-gold-600"></i> ${apt.bedrooms} Bedroom${apt.bedrooms > 1 ? 's' : ''}`;
+                    document.getElementById('apartment-detail-bathrooms').innerHTML = `<i class="fas fa-bath mr-1 text-gold-600"></i> ${apt.bathrooms} Bathroom${apt.bathrooms > 1 ? 's' : ''}`;
+                    document.getElementById('apartment-detail-guests').innerHTML = `<i class="fas fa-users mr-1 text-gold-600"></i> ${apt.guests} Guest${apt.guests > 1 ? 's' : ''}`;
+                    document.getElementById('apartment-detail-description').textContent = apt.description;
+
+                    const imgElement = document.getElementById('apartment-detail-img');
+                    imgElement.src = apt.img;
+                    imgElement.alt = apt.title;
+                    imgElement.onerror = function() { this.onerror=null; this.src='https://placehold.co/800x500/cccccc/ffffff?text=Image+Error'; };
+
+                    // Populate Amenities
+                    const amenitiesList = document.getElementById('apartment-detail-amenities');
+                    amenitiesList.innerHTML = ''; // Clear
+                    const amenityIcons = { // Map keywords to icons
+                        'pool': 'fa-person-swimming', 'wifi': 'fa-wifi', 'kitchen': 'fa-kitchen-set',
+                        'air conditioning': 'fa-snowflake', 'tv': 'fa-tv', 'security': 'fa-shield-halved',
+                        'gym': 'fa-dumbbell', 'parking': 'fa-square-parking', 'generator': 'fa-bolt',
+                        'garden': 'fa-leaf', 'housekeeping': 'fa-broom', 'workspace': 'fa-briefcase',
+                        'elevator': 'fa-elevator', 'ocean view': 'fa-water'
+                    };
+                    apt.amenities.forEach(item => {
+                        const li = document.createElement('li');
+                        let iconClass = 'fa-check-circle'; // Default icon
+                        const lowerItem = item.toLowerCase();
+                        for (const keyword in amenityIcons) {
+                            if (lowerItem.includes(keyword)) {
+                                iconClass = amenityIcons[keyword];
+                                break;
+                            }
+                        }
+                        li.innerHTML = `<i class="fas ${iconClass} mr-2 text-gold-600 w-4 text-center"></i>${item}`;
+                        amenitiesList.appendChild(li);
+                    });
+
+                    // Display Reviews for this Apartment
+                    displayReviews('apartment-reviews-list', apartmentId);
+
+                    // Show the page (this will also trigger map initialization in showPage)
+                    showPage('apartment-detail');
+
+                } else {
+                    console.error(`Apartment data not found for ID: ${apartmentId}`);
+                    showPage('apartments'); // Go back to listing
+                }
+            }
+
+            // Load and Display Services (Main Listing)
+            function displayServices(filterTerm = '', categoryFilter = '') {
+                const container = serviceGridContainerPage;
+                const noResultsMsg = noServicesMessagePage;
+                if (!container) return;
+                container.innerHTML = ''; // Clear existing
+                let servicesFound = false;
+                const searchTerm = filterTerm.toLowerCase();
+                const selectedCategory = categoryFilter.toLowerCase();
+
+                Object.entries(serviceDetailsData).forEach(([id, service]) => {
+                    const serviceCategory = service.category?.toLowerCase() || '';
+                    const keywords = `${service.title} ${service.description} ${service.category} ${service.keywords || ''}`.toLowerCase();
+                    const categoryMatch = !selectedCategory || serviceCategory === selectedCategory;
+                    const searchMatch = !searchTerm || keywords.includes(searchTerm);
+
+                    if (categoryMatch && searchMatch) {
+                        servicesFound = true;
+                        const card = createServiceCard(id, service);
+                        container.appendChild(card);
+                    }
+                });
+                if (noResultsMsg) noResultsMsg.style.display = servicesFound ? 'none' : 'block';
+            }
+
+            // Helper to create a service card element
+            function createServiceCard(id, service) {
+                const card = document.createElement('div');
+                card.className = 'item-card cursor-pointer nav-link'; // Add nav-link class
+                card.dataset.target = 'service-detail';
+                card.dataset.serviceId = id;
+                card.innerHTML = `
+                    <img src="${service.img}" alt="${service.title}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/a0aec0?text=Image+Error'">
+                    <div class="p-4">
+                        <span class="text-xs text-gold-600 font-medium uppercase tracking-wider">${service.category}</span>
+                        <h3 class="text-lg font-semibold my-1 text-deep-blue-900 truncate">${service.title}</h3>
+                        <p class="text-sm text-gray-600 mb-2 line-clamp-2">${service.description.substring(0, 70)}...</p>
+                        <p class="text-base font-semibold text-deep-blue-900">${service.price}</p>
+                    </div>`;
+                return card;
+            }
+
+            // Show Service Detail Page
+            function showServiceDetail(serviceId) {
+                const details = serviceDetailsData[serviceId];
+                currentServiceIdForDetail = serviceId; // Store globally
+                currentProviderIdForDetail = null; // Reset provider context
+
+                if (details) {
+                    // Populate basic service info
+                    document.getElementById('service-detail-category-page').textContent = details.category;
+                    document.getElementById('service-detail-title-page').textContent = details.title;
+                    document.getElementById('service-detail-price-page').textContent = details.price;
+                    document.getElementById('service-detail-duration-page').innerHTML = `Duration: <span class="font-medium">${details.duration || 'Varies'}</span>`;
+                    document.getElementById('service-detail-description-page').textContent = details.description;
+
+                    // Calculate and display average rating for the service itself
+                    const avgRating = calculateAverageRating(serviceId);
+                    const reviewCount = (reviewsData[serviceId] || []).length;
+                    document.getElementById('service-detail-avg-rating-stars-page').innerHTML = generateStarRatingHTML(avgRating);
+                    document.getElementById('service-detail-rating-count-display-page').textContent = `(${reviewCount} Service Reviews)`;
+
+                    // Display reviews for this specific service
+                    displayReviews('service-reviews-list-page', serviceId);
+
+                    // Display available providers for this service
+                    displayServiceProviders(serviceId);
+
+                    showPage('service-detail');
+                } else {
+                    console.error(`Details not found for service ID: ${serviceId}`);
+                    showPage('services');
+                }
+            }
+
+            // Display Providers for a Specific Service
+            function displayServiceProviders(serviceId) {
+                const container = serviceProvidersListContainer;
+                if (!container) return;
+                container.innerHTML = ''; // Clear previous
+
+                const serviceInfo = serviceDetailsData[serviceId];
+                if (!serviceInfo) return;
+
+                // Find providers offering this service title
+                const associatedProviders = Object.entries(providerData).filter(([provId, provData]) =>
+                    provData.services.some(s => s.toLowerCase() === serviceInfo.title.toLowerCase())
+                );
+
+                if (associatedProviders.length > 0) {
+                    associatedProviders.forEach(([providerId, provider]) => {
+                        const card = document.createElement('div');
+                        card.className = 'flex flex-col sm:flex-row items-start gap-4 border rounded-lg p-4 bg-gray-50 shadow-sm';
+
+                        // Calculate provider's average rating across all their listed services
+                        let totalRatingSum = 0;
+                        let totalReviewsCount = 0;
+                        provider.services.forEach(serviceTitle => {
+                             const offeredService = Object.entries(serviceDetailsData).find(([sId, sData]) => sData.title.toLowerCase() === serviceTitle.toLowerCase());
+                             if(offeredService) {
+                                 const offeredServiceId = offeredService[0];
+                                 const reviews = reviewsData[offeredServiceId] || [];
+                                 totalRatingSum += reviews.reduce((sum, r) => sum + r.rating, 0);
+                                 totalReviewsCount += reviews.length;
+                             }
+                        });
+                        const avgProviderRating = totalReviewsCount > 0 ? totalRatingSum / totalReviewsCount : 0;
+
+                        card.innerHTML = `
+                            <img src="${provider.img}" alt="${provider.name}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-gold-600 flex-shrink-0" onerror="this.onerror=null; this.src='https://placehold.co/150x150/cccccc/ffffff?text=Provider';">
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start mb-1">
+                                     <h4 class="font-semibold text-lg text-deep-blue-900">${provider.name}</h4>
+                                     <span class="display-stars text-sm ml-2 whitespace-nowrap" title="${avgProviderRating.toFixed(1)} avg rating">${generateStarRatingHTML(avgProviderRating)}</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">${provider.specialty}</p>
+                                <p class="text-sm text-gray-500 mb-3 line-clamp-2">${provider.bio}</p>
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                     <a href="#" class="text-xs text-gold-600 hover:underline nav-link" data-target="provider-profile" data-provider-id="${providerId}">View Full Profile & Reviews</a>
+                                     <button class="bg-gold-600 hover:bg-gold-700 text-white font-semibold py-1 px-3 rounded-lg transition duration-300 text-xs book-provider-button" data-provider-id="${providerId}" data-service-id="${serviceId}">
+                                         Book with ${provider.name.split(' ')[0]} </button>
+                                </div>
+                            </div>`;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p class="text-gray-500 italic text-sm">No specific partners listed. Booking assigns an available verified professional.</p>';
+                    // Add a generic booking button
+                     const genericBookButton = document.createElement('button');
+                     genericBookButton.className = "mt-4 w-full sm:w-auto bg-gold-600 hover:bg-gold-700 text-white font-bold py-2 px-5 rounded-lg transition duration-300 text-sm book-provider-button";
+                     genericBookButton.dataset.serviceId = serviceId; // No provider ID
+                     genericBookButton.textContent = "Book This Service";
+                     container.appendChild(genericBookButton);
+                }
+            }
+
+            // Show Provider Profile Page
+            function showProviderProfile(providerId) {
+                const provider = providerData[providerId];
+                currentProviderIdForDetail = providerId; // Store globally
+
+                if (provider) {
+                    // Populate provider details
+                    document.getElementById('provider-profile-img').src = provider.img;
+                    document.getElementById('provider-profile-img').alt = provider.name;
+                    document.getElementById('provider-profile-name').textContent = provider.name;
+                    document.getElementById('provider-profile-specialty').textContent = provider.specialty;
+                    document.getElementById('provider-profile-name-about').textContent = provider.name.split(' ')[0]; // Just first name for "About X"
+                    document.getElementById('provider-profile-bio').textContent = provider.bio;
+
+                    // Populate services list with links
+                    const servicesListElement = document.getElementById('provider-profile-services');
+                    servicesListElement.innerHTML = '';
+                    if (provider.services && provider.services.length > 0) {
+                        provider.services.forEach(serviceName => {
+                            const serviceEntry = Object.entries(serviceDetailsData).find(([id, data]) => data.title === serviceName);
+                            const serviceId = serviceEntry ? serviceEntry[0] : null;
+                            const li = document.createElement('li');
+                            if (serviceId) {
+                                li.innerHTML = `<a href="#" class="text-deep-blue-900 hover:text-gold-600 hover:underline nav-link text-sm" data-target="service-detail" data-service-id="${serviceId}">${serviceName}</a>`;
+                            } else {
+                                li.textContent = serviceName;
+                                li.className = 'text-sm';
+                            }
+                            servicesListElement.appendChild(li);
+                        });
+                    } else {
+                         servicesListElement.innerHTML = '<li class="text-sm text-gray-500 italic">No specific services listed.</li>';
+                    }
+
+
+                    // Calculate and display overall provider rating
+                    let totalRatingSum = 0;
+                    let totalReviewsCount = 0;
+                     provider.services.forEach(serviceTitle => { // Iterate through names
+                        const serviceEntry = Object.entries(serviceDetailsData).find(([sId, sData]) => sData.title.toLowerCase() === serviceTitle.toLowerCase());
+                        if(serviceEntry) {
+                            const serviceId = serviceEntry[0];
+                            const reviews = reviewsData[serviceId] || [];
+                            reviews.forEach(r => totalRatingSum += r.rating);
+                            totalReviewsCount += reviews.length;
+                        }
+                     });
+                    const avgProviderRating = totalReviewsCount > 0 ? totalRatingSum / totalReviewsCount : 0;
+
+                    document.getElementById('provider-profile-avg-rating-stars').innerHTML = generateStarRatingHTML(avgProviderRating);
+                    document.getElementById('provider-profile-rating-count-display').textContent = `(${totalReviewsCount} Total Reviews)`;
+
+                    // Display all reviews for this provider
+                    displayProviderReviews('provider-reviews-list', providerId);
+
+                    // Configure the back button
+                    if (providerBackButton) {
+                        if (currentServiceIdForDetail) {
+                            providerBackButton.textContent = `← Back to ${serviceDetailsData[currentServiceIdForDetail]?.title || 'Service'}`;
+                            providerBackButton.dataset.target = 'service-detail';
+                            providerBackButton.dataset.serviceId = currentServiceIdForDetail;
+                        } else {
+                            providerBackButton.textContent = '← Back to Services';
+                            providerBackButton.dataset.target = 'services';
+                            delete providerBackButton.dataset.serviceId; // Remove serviceId if going back to list
+                        }
+                    }
+
+                    showPage('provider-profile');
+                } else {
+                    console.error(`Provider data not found for ID: ${providerId}`);
+                    // Try going back to the service detail if possible, else services list
+                    if (currentServiceIdForDetail) showServiceDetail(currentServiceIdForDetail);
+                    else showPage('services');
+                }
+            }
+
+            // --- Map Function ---
+            function initMap(containerId, lat, lng, popupText) {
+                const mapContainer = document.getElementById(containerId);
+                 if (!mapContainer) {
+                     console.error(`Map container #${containerId} not found.`);
+                     return;
+                 }
+
+                // If a map instance already exists for this container, remove it first
+                if (apartmentMapInstance && mapContainer._leaflet_id) {
+                    console.log("Removing previous map instance.");
+                    apartmentMapInstance.remove();
+                    apartmentMapInstance = null;
+                }
+                 // Clear any placeholder content like "Map loading..."
+                 mapContainer.innerHTML = '';
+
+                 // Check if Leaflet library is loaded
+                 if (typeof L === 'undefined') {
+                     console.error('Leaflet library (L) not loaded.');
+                     mapContainer.innerHTML = '<p class="text-center text-red-500 p-4">Map library failed to load.</p>';
+                     return;
+                 }
+
+                 // Check for valid coordinates
+                 if (typeof lat !== 'number' || typeof lng !== 'number') {
+                     console.warn(`Invalid coordinates for map: Lat=${lat}, Lng=${lng}`);
+                     mapContainer.innerHTML = '<p class="text-center text-gray-500 p-4">Map location data is unavailable.</p>';
+                     return;
+                 }
+
+
+                 try {
+                     console.log(`Initializing map in #${containerId} at [${lat}, ${lng}]`);
+                     // Create new map instance
+                     apartmentMapInstance = L.map(containerId).setView([lat, lng], 14); // Zoom level 14
+
+                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                         maxZoom: 19,
+                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                     }).addTo(apartmentMapInstance);
+
+                     // Add a marker
+                     const marker = L.marker([lat, lng]).addTo(apartmentMapInstance);
+
+                     // Add popup if text is provided
+                     if (popupText) {
+                         marker.bindPopup(`<b>${popupText}</b><br>Approximate Location`).openPopup();
+                     }
+
+                 } catch (error) {
+                     console.error("Error initializing Leaflet map:", error);
+                     mapContainer.innerHTML = '<p class="text-center text-red-500 p-4">Error displaying map.</p>';
+                     apartmentMapInstance = null; // Ensure instance is null on error
+                 }
+            }
+
+
+            // --- Modal & Form Handling ---
+
+             // Show Booking Confirmation Modal (Generic)
+            function showBookingConfirmation(itemTitle, type = 'Service') {
+                if (bookingModalMessage && bookingConfirmationModal) {
+                     bookingModalMessage.textContent = `Your booking request for "${itemTitle}" (${type}) has been received! You will receive confirmation shortly via email.`;
+                     bookingConfirmationModal.style.display = 'block';
+                }
+            }
+
+            // Close Any Modal
+            function closeModal(modalElement) {
+                 if (modalElement) modalElement.style.display = 'none';
+            }
+
+            // Handle Login
+            function handleLogin(event) {
+                event.preventDefault();
+                const email = loginForm.querySelector('#login-email').value;
+                const password = loginForm.querySelector('#login-password').value;
+                const selectedUserType = loginForm.querySelector('#login-user-type').value;
+
+                if (!email || !password) {
+                    loginFeedback.textContent = 'Please enter both email and password.';
+                    loginFeedback.classList.remove('hidden');
+                    return;
+                }
+                // ** SIMULATION **
+                console.log(`Simulating login attempt for ${email} as ${selectedUserType}`);
+                // Dummy check: Use specific emails for testing different roles
+                if (email === 'guest@test.com' && password === 'password' && selectedUserType === 'guest') {
+                    isLoggedIn = true; userType = 'guest'; currentUser = { email: email, name: 'Guest User' };
+                } else if (email === 'apt@test.com' && password === 'password' && selectedUserType === 'apartment_vendor') {
+                    isLoggedIn = true; userType = 'apartment_vendor'; currentUser = { email: email, name: 'Apartment Partner' };
+                } else if (email === 'svc@test.com' && password === 'password' && selectedUserType === 'service_provider') {
+                    isLoggedIn = true; userType = 'service_provider'; currentUser = { email: email, name: 'Service Partner' };
+                } else {
+                     loginFeedback.textContent = 'Invalid email, password, or user type combination (Hint: use test.com emails with "password").';
+                     loginFeedback.classList.remove('hidden');
+                     return;
+                }
+
+                loginFeedback.classList.add('hidden');
+                updateNavAppearance();
+                showDashboardBasedOnUserType();
+                loginForm.reset();
+            }
+
+            // Handle Signup (Guest Only)
+            function handleSignup(event) {
+                event.preventDefault();
+                 const name = signupForm.querySelector('#signup-name').value;
+                 const email = signupForm.querySelector('#signup-email').value;
+                 const password = signupForm.querySelector('#signup-password').value;
+                 const confirmPassword = signupForm.querySelector('#signup-confirm-password').value;
+                 const terms = signupForm.querySelector('#terms').checked;
+                 let errors = [];
+                 if (!name) errors.push('Full name is required.');
+                 if (!email || !/^\S+@\S+\.\S+$/.test(email)) errors.push('Valid email is required.');
+                 if (!password || password.length < 6) errors.push('Password must be at least 6 characters.');
+                 if (password !== confirmPassword) errors.push('Passwords do not match.');
+                 if (!terms) errors.push('You must agree to the Terms and Conditions.');
+
+                 if (errors.length > 0) {
+                     signupFeedback.innerHTML = errors.join('<br>');
+                     signupFeedback.classList.remove('hidden');
+                     return;
+                 }
+
+                // ** SIMULATION **
+                console.log(`Simulating GUEST signup for ${email}`);
+                isLoggedIn = true;
+                userType = 'guest';
+                currentUser = { email: email, name: name }; // Store basic info
+                signupFeedback.classList.add('hidden');
+                updateNavAppearance();
+                showDashboardBasedOnUserType();
+                signupForm.reset();
+            }
+
+            // Handle Vendor Application Submission (Generic)
+            function handleApplicationSubmit(event, formType) {
+                 event.preventDefault();
+                 const form = event.target;
+                 const feedbackElement = formType === 'apartment' ? applyApartmentFeedback : applyServiceFeedback;
+                 feedbackElement.classList.add('hidden'); // Hide previous errors
+
+                 // Basic check for required fields (consider more specific validation)
+                 let formIsValid = true;
+                 form.querySelectorAll('[required]').forEach(input => {
+                    if (input.type === 'checkbox') {
+                         if (!input.checked) formIsValid = false;
+                    } else if (!input.value.trim()) {
+                         formIsValid = false;
+                    }
+                 });
+
+                 if (!formIsValid) {
+                     feedbackElement.textContent = 'Please fill out all required fields and agree to the terms.';
+                     feedbackElement.classList.remove('hidden');
+                     // Optional: Add visual indication to invalid fields
+                     return;
+                 }
+
+                 console.log(`Simulating ${formType} application submission...`);
+                 // In real app: collect form data and send to backend API
+                 const formData = new FormData(form);
+                 const data = Object.fromEntries(formData.entries());
+                 console.log("Simulated Form Data:", data);
+
+                 // Show success message
+                 alert("Application submitted successfully! Our team will review it and contact you shortly. (Simulated)");
+                 form.reset(); // Clear the form
+                 showPage('home'); // Redirect home
+            }
+
+            // Handle Contact Form Submission
+            function handleContactSubmit(event) {
+                 event.preventDefault();
+                 console.log("Simulating contact form submission...");
+                 // Add basic validation if needed
+                 alert("Message sent successfully! We will get back to you soon. (Simulated)");
+                 contactForm.reset();
+                 // Optionally redirect or show success inline
+            }
+
+
+            // Handle Logout
+            function handleLogout(event) {
+                event?.preventDefault(); // Prevent default if called from a link click
+                console.log('Logging out...');
+                isLoggedIn = false;
+                userType = 'guest';
+                currentUser = null;
+                updateNavAppearance();
+                showPage('home'); // Redirect to home page
+            }
+
+             // Show Add Review Modal
+            function showAddReviewModal(itemId, itemType, bookingId = null) {
+                 if (!isLoggedIn) {
+                    showPage('login');
+                    loginFeedback.textContent = 'Please log in to write a review.';
+                    loginFeedback.classList.remove('hidden');
+                    return;
+                 }
+
+                 let itemName = 'Item';
+                 if (itemType === 'service' && serviceDetailsData[itemId]) {
+                     itemName = serviceDetailsData[itemId].title;
+                 } else if (itemType === 'apartment' && apartmentData[itemId]) {
+                     itemName = apartmentData[itemId].title;
+                 }
+
+                 if (addReviewModal && reviewModalItemName && reviewItemIdInput && reviewItemTypeInput) {
+                     reviewModalItemName.textContent = itemName;
+                     reviewItemIdInput.value = itemId;
+                     reviewItemTypeInput.value = itemType;
+                     if (reviewBookingIdInput && bookingId) reviewBookingIdInput.value = bookingId;
+
+                     // Reset form state
+                     reviewForm.reset();
+                     currentRating = 0;
+                     reviewRatingValueInput.value = '';
+                     reviewFeedback.classList.add('hidden');
+                     reviewStarRatingContainer.querySelectorAll('.fa-star').forEach(star => star.classList.remove('selected'));
+
+                     addReviewModal.style.display = 'block';
+                 } else {
+                     console.error("Could not open review modal for item:", itemId, itemType);
+                 }
+            }
+
+            // Handle Review Submission (Simulation)
+            function handleReviewSubmit(event) {
+                event.preventDefault();
+                const rating = reviewRatingValueInput.value;
+                const reviewText = reviewTextInput.value;
+                const itemId = reviewItemIdInput.value;
+                const itemType = reviewItemTypeInput.value; // 'service' or 'apartment'
+
+                if (!rating || rating < 1) { reviewFeedback.textContent = 'Please select a star rating.'; reviewFeedback.classList.remove('hidden'); return; }
+                if (!reviewText.trim()) { reviewFeedback.textContent = 'Please enter your review text.'; reviewFeedback.classList.remove('hidden'); return; }
+
+                console.log(`Simulating review submission for ${itemType} ${itemId}: Rating=${rating}, Text=${reviewText}`);
+                // Add review to local data (for demo purposes)
+                const newReview = {
+                    rating: parseInt(rating),
+                    name: currentUser?.name || 'You (New Review)', // Use logged-in user's name if available
+                    text: reviewText
+                };
+
+                if (!reviewsData[itemId]) {
+                    reviewsData[itemId] = [];
+                }
+                reviewsData[itemId].push(newReview);
+
+                closeModal(addReviewModal);
+
+                // Refresh the detail page if currently viewing it
+                 if (itemType === 'service' && document.getElementById('service-detail').style.display === 'block' && currentServiceIdForDetail === itemId) {
+                     showServiceDetail(itemId); // Re-render the detail page
+                 } else if (itemType === 'apartment' && document.getElementById('apartment-detail').style.display === 'block' && currentApartmentIdForDetail === itemId) {
+                     showApartmentDetail(itemId);
+                 }
+                 alert("Review submitted successfully (simulated)!");
+            }
+
+            // Handle Star Rating Input in Review Modal
+            function handleStarClick(event) {
+                const star = event.target.closest('.fa-star'); // Handle clicks inside the icon
+                if (star && star.dataset.value) {
+                    currentRating = parseInt(star.dataset.value);
+                    reviewRatingValueInput.value = currentRating;
+                    reviewFeedback.classList.add('hidden'); // Hide error on interaction
+
+                    const stars = reviewStarRatingContainer.querySelectorAll('.fa-star');
+                    stars.forEach(s => {
+                        s.classList.toggle('selected', parseInt(s.dataset.value) <= currentRating);
+                    });
+                }
+            }
+
+
+            // --- Dashboard Data Loading (Simulated) ---
+            function loadGuestDashboardData() {
+                console.log("Loading Guest Dashboard Data...");
+                const bookingListContainer = document.getElementById('guest-booking-list');
+                if(!bookingListContainer) return;
+                // Simulate fetching bookings
+                bookingListContainer.innerHTML = `
+                    <div class="border rounded-lg p-4 mb-4 bg-gray-50 text-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold">Stay at Lekki Luxury Penthouse</p>
+                                <p class="text-xs text-gray-500">Dates: 2025-06-10 to 2025-06-15</p>
+                                <p class="text-xs text-gray-500">Status: <span class="text-green-600 font-medium">Confirmed</span></p>
+                            </div>
+                            <a href="#" class="text-xs text-gold-600 hover:underline mt-1 nav-link" data-target="apartment-detail" data-apartment-id="apt-lekki-penthouse">View Details</a>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 mb-4 bg-gray-50 text-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold">Gourmet Private Chef (Completed)</p>
+                                <p class="text-xs text-gray-500">Date: 2025-05-15 | Time: 19:00</p>
+                                <p class="text-xs text-gray-500">Status: <span class="text-blue-600 font-medium">Completed</span></p>
+                            </div>
+                            <button class="text-xs bg-gold-600 text-white hover:bg-gold-700 font-semibold py-1 px-3 rounded-lg transition duration-300 leave-review-button" data-item-id="chef-gourmet" data-item-type="service" data-booking-id="booking123"> Leave Review </button>
+                        </div>
+                    </div>`;
+            }
+
+            function loadApartmentPartnerDashboardData() {
+                console.log("Loading Apartment Partner Dashboard Data...");
+                 const listingContainer = document.getElementById('apartment-listing-cards');
+                 const bookingContainer = document.getElementById('apartment-booking-requests');
+                 if(listingContainer) {
+                     // Simulate listing owned apartments
+                     listingContainer.innerHTML = `
+                        <div class="border rounded-lg p-4 bg-gray-50 flex justify-between items-center text-sm">
+                            <div>
+                                <p class="font-semibold">Lekki Luxury Penthouse</p>
+                                <p class="text-xs text-gray-500">Status: <span class="text-green-600">Active</span> | Bookings: 3 Upcoming</p>
+                            </div>
+                            <a href="#" class="text-xs text-gold-600 hover:underline">Edit / Manage</a>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-red-50 flex justify-between items-center text-sm">
+                            <div>
+                                <p class="font-semibold">Ikoyi Executive Suite</p>
+                                <p class="text-xs text-gray-500">Status: <span class="text-red-600">Paused</span></p>
+                            </div>
+                            <a href="#" class="text-xs text-gold-600 hover:underline">Edit / Manage</a>
+                        </div>`;
+                 }
+                 if(bookingContainer) {
+                     // Simulate booking requests
+                     bookingContainer.innerHTML = `
+                         <div class="border rounded-lg p-4 mb-4 bg-yellow-50 border-yellow-200 text-sm">
+                             <p class="font-semibold">Request for Lekki Luxury Penthouse</p>
+                             <p class="text-xs text-gray-500">Guest: Guest User | Dates: 2025-07-01 to 2025-07-05</p>
+                             <div class="mt-2 space-x-2">
+                                 <button class="text-xs bg-green-600 text-white hover:bg-green-700 font-semibold py-1 px-3 rounded-lg transition duration-300">Approve</button>
+                                 <button class="text-xs bg-red-600 text-white hover:bg-red-700 font-semibold py-1 px-3 rounded-lg transition duration-300">Decline</button>
+                             </div>
+                         </div>
+                         <h3 class="text-lg font-semibold mt-6 mb-2 text-deep-blue-800">Confirmed Bookings</h3>
+                          <div class="border rounded-lg p-4 bg-gray-50 text-sm">
+                             <p class="font-semibold">Confirmed: Lekki Luxury Penthouse</p>
+                             <p class="text-xs text-gray-500">Guest: Another Guest | Dates: 2025-06-10 to 2025-06-15</p>
+                         </div>`;
+                 }
+            }
+
+             function loadServiceProviderDashboardData() {
+                 console.log("Loading Service Provider Dashboard Data...");
+                 const bookingListContainer = document.getElementById('service-booking-list');
+                 if(!bookingListContainer) return;
+                 // Simulate loading bookings/requests
+                  bookingListContainer.innerHTML = `
+                         <div class="border rounded-lg p-4 mb-4 bg-yellow-50 border-yellow-200 text-sm">
+                             <p class="font-semibold">Request: Deep Tissue Massage</p>
+                             <p class="text-xs text-gray-500">Guest: Guest User | Date: 2025-07-10 | Time: 14:00 | Location: Lekki Phase 1</p>
+                             <div class="mt-2 space-x-2">
+                                 <button class="text-xs bg-green-600 text-white hover:bg-green-700 font-semibold py-1 px-3 rounded-lg transition duration-300">Confirm</button>
+                                 <button class="text-xs bg-red-600 text-white hover:bg-red-700 font-semibold py-1 px-3 rounded-lg transition duration-300">Decline</button>
+                             </div>
+                         </div>
+                          <h3 class="text-lg font-semibold mt-6 mb-2 text-deep-blue-800">Confirmed Bookings</h3>
+                         <div class="border rounded-lg p-4 bg-gray-50 text-sm">
+                             <p class="font-semibold">Confirmed: Gourmet Private Chef</p>
+                             <p class="text-xs text-gray-500">Guest: Another Guest | Date: 2025-07-15 | Time: 19:00 | Location: Ikoyi</p>
+                         </div>`;
+             }
+
+
+            // --- Event Listeners ---
+
+            // Universal Navigation Link Handling (using event delegation on body)
+            document.body.addEventListener('click', (event) => {
+                const link = event.target.closest('.nav-link');
+                if (link) {
+                    event.preventDefault();
+                    const targetId = link.dataset.target;
+                    const serviceId = link.dataset.serviceId;
+                    const providerId = link.dataset.providerId;
+                    const apartmentId = link.dataset.apartmentId;
+
+                    console.log(`Navigating via Body Delegation: target=${targetId}, serviceId=${serviceId}, providerId=${providerId}, apartmentId=${apartmentId}`);
+
+                    // Prioritize more specific actions
+                    if (targetId === 'provider-profile' && providerId) {
+                        currentServiceIdForDetail = serviceId || currentServiceIdForDetail; // Remember service context if available
+                        showProviderProfile(providerId);
+                    } else if (targetId === 'service-detail' && serviceId) {
+                        showServiceDetail(serviceId);
+                    } else if (targetId === 'apartment-detail' && apartmentId) {
+                        showApartmentDetail(apartmentId);
+                    } else if (targetId) {
+                        // Handle standard page links and dashboard links
+                        if (targetId === 'dashboard') {
+                             if (isLoggedIn) showDashboardBasedOnUserType(); else showPage('login');
+                        } else {
+                             showPage(targetId);
+                        }
+                        // Reset context when navigating to lists
+                        if (targetId === 'services') currentServiceIdForDetail = null;
+                        if (targetId === 'apartments') currentApartmentIdForDetail = null;
+                        if (targetId !== 'provider-profile') currentProviderIdForDetail = null; // Reset provider if not going there
+                        if (targetId !== 'service-detail') currentServiceIdForDetail = null; // Reset service if not going there
+
+                    }
+                }
+
+                 // Logout Link Handling (non .nav-link)
+                 const logoutLink = event.target.closest('#nav-logout, #mobile-nav-logout, #dashboard-guest-logout, #dashboard-apartment-logout, #dashboard-service-logout');
+                 if (logoutLink) {
+                     event.preventDefault();
+                     handleLogout();
+                 }
+
+                 // Dashboard Link Handling (specific dashboard context)
+                 const dashboardLink = event.target.closest('.dashboard-link');
+                 if(dashboardLink) {
+                     event.preventDefault();
+                     const targetViewId = dashboardLink.dataset.target;
+                     // Determine which dashboard context we are in
+                     const guestNav = dashboardLink.closest('#guest-dashboard-nav');
+                     const aptNav = dashboardLink.closest('#apartment-dashboard-nav');
+                     const svcNav = dashboardLink.closest('#service-dashboard-nav');
+
+                     if(guestNav && targetViewId) {
+                         showDashboardView(targetViewId, guestNav.querySelectorAll('.dashboard-link'), guestDashboardViews);
+                     } else if (aptNav && targetViewId) {
+                         showDashboardView(targetViewId, aptNav.querySelectorAll('.dashboard-link'), apartmentDashboardViews);
+                     } else if (svcNav && targetViewId) {
+                          showDashboardView(targetViewId, svcNav.querySelectorAll('.dashboard-link'), serviceDashboardViews);
+                     }
+                 }
+
+                 // "Leave Review" Button Handling (event delegation on body)
+                 const reviewButton = event.target.closest('.leave-review-button');
+                 if (reviewButton) {
+                     const itemId = reviewButton.dataset.itemId || reviewButton.dataset.serviceId; // Support old data attr too
+                     const itemType = reviewButton.dataset.itemType || 'service'; // Default to service if type not specified
+                     const bookingId = reviewButton.dataset.bookingId;
+                     if (itemId) {
+                         showAddReviewModal(itemId, itemType, bookingId);
+                     } else {
+                         console.warn("Leave review button clicked without item ID");
+                     }
+                 }
+
+                 // "Book with Provider" Button Handling (event delegation on body)
+                 const bookProviderButton = event.target.closest('.book-provider-button');
+                 if (bookProviderButton) {
+                     if (!isLoggedIn) {
+                         showPage('login');
+                         loginFeedback.textContent = 'Please log in or sign up to book a service.';
+                         loginFeedback.classList.remove('hidden');
+                         return;
+                     }
+                     const serviceId = bookProviderButton.dataset.serviceId;
+                     const providerId = bookProviderButton.dataset.providerId; // Might be undefined
+                     const serviceTitle = serviceDetailsData[serviceId]?.title || 'Selected Service';
+                     const providerName = providerId ? providerData[providerId]?.name : 'LuxeStay Verified Partner';
+
+                     console.log(`Booking request: ${serviceTitle} with ${providerName} (Provider ID: ${providerId})`);
+                     // In real app: Go to booking confirmation/payment step
+                     showBookingConfirmation(serviceTitle);
+                 }
+
+                  // "Request to Book Apartment" Button Handling
+                 const bookApartmentButton = event.target.closest('#request-apartment-booking-button');
+                 if (bookApartmentButton && currentApartmentIdForDetail) {
+                     if (!isLoggedIn) {
+                         showPage('login');
+                         loginFeedback.textContent = 'Please log in or sign up to book an apartment.';
+                         loginFeedback.classList.remove('hidden');
+                         return;
+                     }
+                      const aptTitle = apartmentData[currentApartmentIdForDetail]?.title || 'Selected Apartment';
+                      // Add check-in/out date validation here if desired
+                      console.log(`Booking request for apartment: ${aptTitle}`);
+                      showBookingConfirmation(aptTitle, 'Apartment');
+                 }
+
+            });
+
+
+            // Mobile Menu Toggle
+            if (mobileMenuButton) mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+            // Filtering Inputs
+            if (serviceSearchInputPage) serviceSearchInputPage.addEventListener('input', () => displayServices(serviceSearchInputPage.value, serviceCategoryFilterPage.value));
+            if (serviceCategoryFilterPage) serviceCategoryFilterPage.addEventListener('change', () => displayServices(serviceSearchInputPage.value, serviceCategoryFilterPage.value));
+            if (apartmentSearchInput) apartmentSearchInput.addEventListener('input', () => displayApartments(apartmentSearchInput.value, apartmentBedroomsFilter.value));
+            if (apartmentBedroomsFilter) apartmentBedroomsFilter.addEventListener('change', () => displayApartments(apartmentSearchInput.value, apartmentBedroomsFilter.value));
+
+            // Modal Close Buttons
+            if (bookingModalCloseButton) bookingModalCloseButton.addEventListener('click', () => closeModal(bookingConfirmationModal));
+            if (bookingModalOkButton) bookingModalOkButton.addEventListener('click', () => closeModal(bookingConfirmationModal));
+            if (reviewModalCloseButton) reviewModalCloseButton.addEventListener('click', () => closeModal(addReviewModal));
+
+            // Modal Background Click to Close
+            if (bookingConfirmationModal) bookingConfirmationModal.addEventListener('click', (event) => { if (event.target === bookingConfirmationModal) closeModal(bookingConfirmationModal); });
+            if (addReviewModal) addReviewModal.addEventListener('click', (event) => { if (event.target === addReviewModal) closeModal(addReviewModal); });
+
+            // Form Submissions
+            if (loginForm) loginForm.addEventListener('submit', handleLogin);
+            if (signupForm) signupForm.addEventListener('submit', handleSignup);
+            if (contactForm) contactForm.addEventListener('submit', handleContactSubmit);
+            if (applyApartmentForm) applyApartmentForm.addEventListener('submit', (e) => handleApplicationSubmit(e, 'apartment'));
+            if (applyServiceForm) applyServiceForm.addEventListener('submit', (e) => handleApplicationSubmit(e, 'service'));
+
+            // Review Modal Form & Stars
+            if (reviewForm) reviewForm.addEventListener('submit', handleReviewSubmit);
+            if (reviewStarRatingContainer) reviewStarRatingContainer.addEventListener('click', handleStarClick);
+
+
+            // --- Initial Load ---
+            updateNavAppearance();
+            displayFeaturedApartments();
+            displayApartments(); // Initial load for apartment page filter
+            displayServices();   // Initial load for service page filter
+            showPage('home');    // Show home page first
+
+            console.log("LuxeStay Initialized Successfully.");
+        });
+    </script>
+
+</body>
+</html>
